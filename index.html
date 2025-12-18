@@ -22,6 +22,11 @@
 <body>
     <nav class="nav">
         <a href="/" class="nav-logo">Cars <span>&</span> Kids</a>
+        <button class="nav-toggle" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
         <div class="nav-links">
             <a href="#about">What We Do</a>
             <a href="#why-cars">Why Cars</a>
@@ -182,6 +187,15 @@
     </div>
 
     <script>
+        // Mobile menu toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
         // Smooth scroll for nav links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -192,6 +206,9 @@
                     const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
                     window.scrollTo({ top, behavior: 'smooth' });
                 }
+                // Close mobile menu after clicking a link
+                navToggle.classList.remove('active');
+                navLinks.classList.remove('active');
             });
         });
 
