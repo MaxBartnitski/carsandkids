@@ -1,4 +1,4 @@
-/* Cars & Kids - Modern Nonprofit Website */
+/* Cars & Kids - Streamlined Website */
 
 * {
     margin: 0;
@@ -52,7 +52,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 0 24px;
 }
@@ -78,7 +78,7 @@ body {
 }
 
 .header-container {
-    max-width: 1200px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 0 24px;
     display: flex;
@@ -187,7 +187,7 @@ body {
    Hero Section
    ============================================ */
 .hero {
-    min-height: 100vh;
+    min-height: 70vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -273,15 +273,15 @@ body {
     position: relative;
     z-index: 1;
     text-align: center;
-    padding: 120px 24px 80px;
-    max-width: 900px;
+    padding: 100px 24px 60px;
+    max-width: 700px;
 }
 
 .hero-title {
-    font-size: clamp(48px, 10vw, 80px);
+    font-size: clamp(42px, 10vw, 72px);
     font-weight: 800;
     color: var(--white);
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     letter-spacing: -0.03em;
     animation: fadeInUp 0.8s ease-out 0.2s both;
 }
@@ -290,22 +290,13 @@ body {
     color: var(--accent);
 }
 
-.hero-tagline {
-    font-size: clamp(18px, 3vw, 24px);
-    color: var(--accent-light);
-    font-weight: 500;
-    font-style: italic;
-    margin-bottom: 20px;
-    animation: fadeInUp 0.8s ease-out 0.4s both;
-}
-
 .hero-description {
     font-size: clamp(16px, 2.5vw, 20px);
     color: rgba(255, 255, 255, 0.9);
-    max-width: 700px;
-    margin: 0 auto 40px;
+    max-width: 500px;
+    margin: 0 auto 32px;
     line-height: 1.7;
-    animation: fadeInUp 0.8s ease-out 0.6s both;
+    animation: fadeInUp 0.8s ease-out 0.4s both;
 }
 
 .hero-ctas {
@@ -313,12 +304,12 @@ body {
     gap: 16px;
     justify-content: center;
     flex-wrap: wrap;
-    animation: fadeInUp 0.8s ease-out 0.8s both;
+    animation: fadeInUp 0.8s ease-out 0.6s both;
 }
 
 .hero-scroll-indicator {
     position: absolute;
-    bottom: 40px;
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
     color: rgba(255, 255, 255, 0.6);
@@ -355,10 +346,10 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 14px 32px;
+    padding: 14px 28px;
     font-size: 16px;
     font-weight: 600;
-    border-radius: 12px;
+    border-radius: 10px;
     text-decoration: none;
     transition: all 0.3s ease;
     cursor: pointer;
@@ -393,270 +384,80 @@ body {
    Sections
    ============================================ */
 .section {
-    padding: 120px 0;
+    padding: 70px 0;
 }
 
 .section-title {
-    font-size: clamp(32px, 5vw, 44px);
+    font-size: clamp(28px, 5vw, 36px);
     font-weight: 700;
     color: var(--primary);
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     letter-spacing: -0.02em;
 }
 
-.section-subtitle {
-    font-size: 18px;
-    color: var(--gray-600);
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto 60px;
-    line-height: 1.7;
-}
-
 /* ============================================
-   What We Do Section
+   About Section
    ============================================ */
-.what-we-do {
+.about {
     background: var(--gray-50);
 }
 
-.cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 32px;
-}
-
-.card {
-    background: var(--white);
-    border-radius: 20px;
-    padding: 40px 32px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-    transition: all 0.3s ease;
-    opacity: 0;
-    transform: translateY(20px);
-}
-
-.card.animate-in {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-}
-
-.card-icon {
-    width: 64px;
-    height: 64px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    margin-bottom: 24px;
-}
-
-.card-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 12px;
-}
-
-.card-description {
-    font-size: 16px;
-    color: var(--gray-600);
-    line-height: 1.7;
-}
-
-/* ============================================
-   Why It Matters Section
-   ============================================ */
-.why-it-matters {
-    background: var(--white);
-}
-
-.values-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 40px;
-}
-
-.value-item {
-    display: flex;
-    gap: 20px;
-    padding: 24px;
-    border-radius: 16px;
-    transition: all 0.3s ease;
-    opacity: 0;
-    transform: translateY(20px);
-}
-
-.value-item.animate-in {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.value-item:hover {
-    background: var(--warm-bg);
-}
-
-.value-icon {
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
-    background: var(--primary);
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-}
-
-.value-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 8px;
-}
-
-.value-description {
-    font-size: 15px;
-    color: var(--gray-600);
-    line-height: 1.7;
+.about-text {
+    font-size: 18px;
+    color: var(--gray-700);
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.8;
 }
 
 /* ============================================
    Get Involved Section
    ============================================ */
 .get-involved {
-    background: linear-gradient(180deg, var(--gray-50) 0%, var(--warm-bg) 100%);
-}
-
-.involvement-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 32px;
-}
-
-.involvement-card {
     background: var(--white);
-    border-radius: 20px;
-    padding: 40px 32px;
-    text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-    opacity: 0;
-    transform: translateY(20px);
 }
 
-.involvement-card.animate-in {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.involvement-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-8px);
-    box-shadow: 0 12px 40px rgba(249, 115, 22, 0.15);
-}
-
-.involvement-icon {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    border-radius: 20px;
+.involve-links {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    margin: 0 auto 24px;
-    transition: all 0.3s ease;
-}
-
-.involvement-card:hover .involvement-icon {
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
-    transform: scale(1.05);
-}
-
-.involvement-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 12px;
-}
-
-.involvement-description {
-    font-size: 15px;
-    color: var(--gray-600);
-    line-height: 1.7;
-    margin-bottom: 20px;
-}
-
-.involvement-link {
-    display: inline-flex;
-    align-items: center;
-    color: var(--accent);
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    font-family: inherit;
-}
-
-.involvement-link:hover {
-    color: var(--accent-dark);
-    gap: 4px;
-}
-
-/* ============================================
-   Contact Section (Simplified)
-   ============================================ */
-.contact {
-    background: linear-gradient(180deg, var(--warm-bg) 0%, var(--white) 100%);
-    padding: 100px 0;
-}
-
-.contact-simple {
-    text-align: center;
-    max-width: 600px;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 280px;
     margin: 0 auto;
 }
 
-.contact-icon-large {
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    border-radius: 24px;
+.involve-link {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: var(--white);
-    margin: 0 auto 32px;
-}
-
-.contact-subtitle {
-    font-size: 18px;
-    color: var(--gray-600);
-    margin-bottom: 32px;
-    line-height: 1.7;
-}
-
-.btn-email {
     gap: 12px;
-    font-size: 18px;
-    padding: 18px 40px;
+    padding: 14px 20px;
+    background: transparent;
+    border: 2px solid var(--gray-200);
+    border-radius: 10px;
+    color: var(--gray-700);
+    font-size: 17px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
 }
 
-.btn-email svg {
-    flex-shrink: 0;
+.involve-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--warm-accent);
+}
+
+.involve-arrow {
+    color: var(--accent);
+    font-weight: 600;
+    transition: transform 0.2s ease;
+}
+
+.involve-link:hover .involve-arrow {
+    transform: translateX(4px);
 }
 
 /* ============================================
@@ -736,15 +537,15 @@ body {
 }
 
 .modal-title {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
     color: var(--primary);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     padding-right: 40px;
 }
 
 .modal-subtitle {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--gray-600);
 }
 
@@ -764,15 +565,15 @@ body {
    ============================================ */
 .footer {
     background: var(--primary);
-    padding: 60px 0 40px;
+    padding: 50px 0 30px;
 }
 
 .footer-content {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 40px;
-    gap: 40px;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 30px;
 }
 
 .footer-logo {
@@ -780,48 +581,44 @@ body {
     align-items: center;
     gap: 10px;
     color: var(--white);
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .footer-logo .logo-icon {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
 }
 
 .footer-tagline {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 15px;
-    max-width: 300px;
-    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    font-style: italic;
+    max-width: 280px;
+    line-height: 1.5;
 }
 
-.footer-links {
-    display: flex;
-    gap: 32px;
-}
-
-.footer-links a {
-    color: rgba(255, 255, 255, 0.8);
+.footer-email {
+    color: var(--accent-light);
     text-decoration: none;
     font-size: 15px;
     font-weight: 500;
     transition: color 0.2s ease;
 }
 
-.footer-links a:hover {
+.footer-email:hover {
     color: var(--accent);
 }
 
 .footer-bottom {
-    padding-top: 24px;
+    padding-top: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .footer-bottom p {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 13px;
     text-align: center;
 }
 
@@ -843,25 +640,15 @@ body {
     }
     
     .section {
-        padding: 80px 0;
+        padding: 50px 0;
+    }
+    
+    .hero {
+        min-height: 60vh;
     }
     
     .hero-content {
-        padding: 100px 20px 60px;
-    }
-    
-    .values-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
-    }
-    
-    .value-item {
-        padding: 20px;
-    }
-    
-    .cards-grid,
-    .involvement-grid {
-        grid-template-columns: 1fr;
+        padding: 80px 20px 50px;
     }
     
     .footer-content {
@@ -872,12 +659,6 @@ body {
     
     .footer-tagline {
         max-width: none;
-    }
-    
-    .footer-links {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
     }
     
     /* Modal responsive */
@@ -899,7 +680,7 @@ body {
     }
     
     .modal-title {
-        font-size: 22px;
+        font-size: 20px;
     }
     
     .modal-close {
@@ -907,26 +688,6 @@ body {
         right: 12px;
         width: 36px;
         height: 36px;
-    }
-    
-    /* Contact responsive */
-    .contact {
-        padding: 80px 0;
-    }
-    
-    .contact-icon-large {
-        width: 80px;
-        height: 80px;
-    }
-    
-    .contact-icon-large svg {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .btn-email {
-        font-size: 16px;
-        padding: 16px 32px;
     }
 }
 
@@ -938,34 +699,18 @@ body {
     
     .btn {
         width: 100%;
-        max-width: 280px;
-    }
-    
-    .card,
-    .involvement-card {
-        padding: 28px 24px;
+        max-width: 260px;
     }
     
     .section-title {
-        font-size: 28px;
+        font-size: 26px;
     }
     
-    .section-subtitle {
+    .about-text {
         font-size: 16px;
-        margin-bottom: 40px;
+    }
+    
+    .involve-links {
+        max-width: 100%;
     }
 }
-
-/* Animation delays for staggered entrance */
-.card:nth-child(1) { transition-delay: 0s; }
-.card:nth-child(2) { transition-delay: 0.1s; }
-.card:nth-child(3) { transition-delay: 0.2s; }
-
-.value-item:nth-child(1) { transition-delay: 0s; }
-.value-item:nth-child(2) { transition-delay: 0.1s; }
-.value-item:nth-child(3) { transition-delay: 0.2s; }
-.value-item:nth-child(4) { transition-delay: 0.3s; }
-
-.involvement-card:nth-child(1) { transition-delay: 0s; }
-.involvement-card:nth-child(2) { transition-delay: 0.1s; }
-.involvement-card:nth-child(3) { transition-delay: 0.2s; }
