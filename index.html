@@ -147,40 +147,173 @@
 
     <!-- Modals -->
     <div id="driveModal" class="modal" onclick="closeModalOnBackdrop(event, 'drive')">
-        <div class="modal-content modal-form">
+        <div class="modal-content">
             <button class="modal-close" onclick="closeModal('drive')">&times;</button>
             <div class="modal-header">
-                <h2>Bring your car</h2>
-                <p>Share your car and make a kid's day.</p>
+                <h2>Drive With Cars & Kids</h2>
+                <p>Tell us about yourself and your car. We'll follow up with next steps.</p>
             </div>
             <div class="modal-body">
-                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeqvNnD5h6_1Ak-nOhmW400GTZzQagWAqgWYrMPYwwfPPzoSw/viewform?embedded=true" width="100%" height="100%" frameborder="0" loading="lazy">Loading…</iframe>
+                <form id="driveForm" class="custom-form">
+                    <div class="form-group">
+                        <label for="drive-name">Full name</label>
+                        <input type="text" id="drive-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="drive-email">Email</label>
+                        <input type="email" id="drive-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="drive-phone">Phone</label>
+                        <input type="tel" id="drive-phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="drive-car">Car make + model</label>
+                        <input type="text" id="drive-car" name="car" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Can you:</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="canDo" value="Display your car"> Display your car
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="canDo" value="Give rides (where permitted)"> Give rides (where permitted)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="drive-availability">Availability</label>
+                        <select id="drive-availability" name="availability">
+                            <option value="">Select...</option>
+                            <option value="Weekends">Weekends</option>
+                            <option value="Weekdays">Weekdays</option>
+                            <option value="Flexible">Flexible</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="drive-why">What drew you to Cars & Kids?</label>
+                        <textarea id="drive-why" name="why" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Submit</button>
+                </form>
             </div>
         </div>
     </div>
 
     <div id="visitModal" class="modal" onclick="closeModalOnBackdrop(event, 'visit')">
-        <div class="modal-content modal-form">
+        <div class="modal-content">
             <button class="modal-close" onclick="closeModal('visit')">&times;</button>
             <div class="modal-header">
-                <h2>Request a visit</h2>
-                <p>Request a Cars & Kids visit for your organization.</p>
+                <h2>Request a Visit</h2>
+                <p>Share a few details and we'll follow up to learn more.</p>
             </div>
             <div class="modal-body">
-                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdTQD-Vf5sN-sY7c1f6nkTZuQO65caPEFepwRiSW5o_svbN-g/viewform?embedded=true" width="100%" height="100%" frameborder="0" loading="lazy">Loading…</iframe>
+                <form id="visitForm" class="custom-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="visit-org">Organization name</label>
+                            <input type="text" id="visit-org" name="org" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="visit-contact">Contact name</label>
+                            <input type="text" id="visit-contact" name="contact" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="visit-email">Email</label>
+                            <input type="email" id="visit-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="visit-phone">Phone</label>
+                            <input type="tel" id="visit-phone" name="phone">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="visit-type">Type of organization</label>
+                            <input type="text" id="visit-type" name="type" placeholder="Hospital, school, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label for="visit-kids">Approx. number of kids</label>
+                            <input type="text" id="visit-kids" name="kids">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="visit-age">Age range</label>
+                            <input type="text" id="visit-age" name="age">
+                        </div>
+                        <div class="form-group">
+                            <label for="visit-location">Location</label>
+                            <input type="text" id="visit-location" name="location">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="visit-constraints">Any constraints (noise, rides, etc.)</label>
+                        <input type="text" id="visit-constraints" name="constraints">
+                    </div>
+                    <div class="form-group">
+                        <label for="visit-timing">Preferred timing (rough window)</label>
+                        <input type="text" id="visit-timing" name="timing">
+                    </div>
+                    <button type="submit" class="btn-submit">Submit</button>
+                </form>
             </div>
         </div>
     </div>
 
     <div id="supportModal" class="modal" onclick="closeModalOnBackdrop(event, 'support')">
-        <div class="modal-content modal-form">
+        <div class="modal-content">
             <button class="modal-close" onclick="closeModal('support')">&times;</button>
             <div class="modal-header">
-                <h2>Support us</h2>
-                <p>Help us reach more kids.</p>
+                <h2>Support Cars & Kids</h2>
+                <p>If you're interested in supporting what we do, we'd love to connect.</p>
             </div>
             <div class="modal-body">
-                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeDS4DtGdjeYgkThJCMBqloBDQcoRZeMG7y3Z-WPWHghwZn4w/viewform?embedded=true" width="100%" height="100%" frameborder="0" loading="lazy">Loading…</iframe>
+                <form id="supportForm" class="custom-form">
+                    <div class="form-group">
+                        <label for="support-name">Name</label>
+                        <input type="text" id="support-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="support-email">Email</label>
+                        <input type="email" id="support-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="support-org">Organization / Company</label>
+                        <input type="text" id="support-org" name="org">
+                    </div>
+                    <div class="form-group">
+                        <label>How would you like to support Cars & Kids?</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="supportType" value="Sponsorship"> Sponsorship
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="supportType" value="Financial donation"> Financial donation
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="supportType" value="Vehicles / logistics"> Vehicles / logistics
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="supportType" value="Food / event support"> Food / event support
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="supportType" value="Media / promotion"> Media / promotion
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="supportType" value="Other"> Other
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="support-notes">Anything else you'd like us to know?</label>
+                        <textarea id="support-notes" name="notes" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Submit</button>
+                </form>
             </div>
         </div>
     </div>
@@ -228,6 +361,67 @@
                 document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
                 document.body.style.overflow = 'auto';
             }
+        });
+
+        // Form submissions to Google Forms
+        document.getElementById('driveForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const canDo = Array.from(form.querySelectorAll('input[name="canDo"]:checked')).map(cb => cb.value);
+            
+            const url = new URL('https://docs.google.com/forms/d/e/1FAIpQLSeqvNnD5h6_1Ak-nOhmW400GTZzQagWAqgWYrMPYwwfPPzoSw/formResponse');
+            url.searchParams.set('entry.1945822114', form.querySelector('#drive-name').value);
+            url.searchParams.set('entry.2010497485', form.querySelector('#drive-email').value);
+            url.searchParams.set('entry.169590424', form.querySelector('#drive-phone').value);
+            url.searchParams.set('entry.581039457', form.querySelector('#drive-car').value);
+            canDo.forEach(val => url.searchParams.append('entry.79750238', val));
+            url.searchParams.set('entry.960657169', form.querySelector('#drive-availability').value);
+            url.searchParams.set('entry.1365293258', form.querySelector('#drive-why').value);
+            
+            fetch(url, { method: 'POST', mode: 'no-cors' });
+            form.reset();
+            closeModal('drive');
+            alert('Thank you! We\'ll be in touch soon.');
+        });
+
+        document.getElementById('visitForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = e.target;
+            
+            const url = new URL('https://docs.google.com/forms/d/e/1FAIpQLSdTQD-Vf5sN-sY7c1f6nkTZuQO65caPEFepwRiSW5o_svbN-g/formResponse');
+            url.searchParams.set('entry.236242554', form.querySelector('#visit-org').value);
+            url.searchParams.set('entry.1051026975', form.querySelector('#visit-contact').value);
+            url.searchParams.set('entry.1909514253', form.querySelector('#visit-email').value);
+            url.searchParams.set('entry.1256584643', form.querySelector('#visit-phone').value);
+            url.searchParams.set('entry.64655232', form.querySelector('#visit-type').value);
+            url.searchParams.set('entry.403471719', form.querySelector('#visit-kids').value);
+            url.searchParams.set('entry.1276959081', form.querySelector('#visit-age').value);
+            url.searchParams.set('entry.194769397', form.querySelector('#visit-location').value);
+            url.searchParams.set('entry.746439507', form.querySelector('#visit-constraints').value);
+            url.searchParams.set('entry.352982221', form.querySelector('#visit-timing').value);
+            
+            fetch(url, { method: 'POST', mode: 'no-cors' });
+            form.reset();
+            closeModal('visit');
+            alert('Thank you! We\'ll be in touch soon.');
+        });
+
+        document.getElementById('supportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const supportTypes = Array.from(form.querySelectorAll('input[name="supportType"]:checked')).map(cb => cb.value);
+            
+            const url = new URL('https://docs.google.com/forms/d/e/1FAIpQLSeDS4DtGdjeYgkThJCMBqloBDQcoRZeMG7y3Z-WPWHghwZn4w/formResponse');
+            url.searchParams.set('entry.235714150', form.querySelector('#support-name').value);
+            url.searchParams.set('entry.2054234273', form.querySelector('#support-email').value);
+            url.searchParams.set('entry.2049686966', form.querySelector('#support-org').value);
+            supportTypes.forEach(val => url.searchParams.append('entry.769997405', val));
+            url.searchParams.set('entry.1132339311', form.querySelector('#support-notes').value);
+            
+            fetch(url, { method: 'POST', mode: 'no-cors' });
+            form.reset();
+            closeModal('support');
+            alert('Thank you! We\'ll be in touch soon.');
         });
     </script>
 </body>
