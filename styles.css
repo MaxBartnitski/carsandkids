@@ -242,7 +242,7 @@ main {
 /* Belief */
 .belief {
     padding: 80px 48px;
-    background: var(--gray-bg);
+    background: var(--white);
 }
 
 .belief-content {
