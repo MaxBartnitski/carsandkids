@@ -27,7 +27,7 @@
                 <a href="#what-we-do" class="nav-link">What We Do</a>
                 <a href="#why-it-matters" class="nav-link">Why It Matters</a>
                 <a href="#get-involved" class="nav-link">Get Involved</a>
-                <a href="#contact" class="nav-link">Contact</a>
+                <a href="mailto:info@carsandkids.net" class="nav-link">Contact</a>
             </nav>
             <button class="mobile-menu-btn" aria-label="Menu">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -44,7 +44,7 @@
         <a href="#what-we-do" class="mobile-nav-link">What We Do</a>
         <a href="#why-it-matters" class="mobile-nav-link">Why It Matters</a>
         <a href="#get-involved" class="mobile-nav-link">Get Involved</a>
-        <a href="#contact" class="mobile-nav-link">Contact</a>
+        <a href="mailto:info@carsandkids.net" class="mobile-nav-link">Contact</a>
     </nav>
 
     <!-- Hero Section -->
@@ -63,7 +63,7 @@
             <p class="hero-description">Cars & Kids brings incredible cars and unforgettable experiences directly to kids in hospitals, schools, and community programs.</p>
             <div class="hero-ctas">
                 <a href="#get-involved" class="btn btn-primary">Get Involved</a>
-                <a href="#contact" class="btn btn-secondary">Contact Us</a>
+                <a href="mailto:info@carsandkids.net" class="btn btn-secondary">Contact Us</a>
             </div>
         </div>
         <div class="hero-scroll-indicator">
@@ -195,9 +195,9 @@
                             <circle cx="17" cy="17" r="2"></circle>
                         </svg>
                     </div>
-                    <h3 class="involvement-title">Volunteers with Cars</h3>
+                    <h3 class="involvement-title">Drive With Us</h3>
                     <p class="involvement-description">Have an amazing car? Share the experience. Whether it's a classic muscle car, an exotic supercar, or something uniquely cool—kids want to see it.</p>
-                    <a href="#contact" class="involvement-link">Bring Your Car →</a>
+                    <button onclick="openModal('drive')" class="involvement-link">Bring Your Car →</button>
                 </div>
                 
                 <div class="involvement-card">
@@ -207,9 +207,9 @@
                             <polyline points="9 22 9 12 15 12 15 22"></polyline>
                         </svg>
                     </div>
-                    <h3 class="involvement-title">Organizations</h3>
+                    <h3 class="involvement-title">Host a Visit</h3>
                     <p class="involvement-description">Hospital, school, or community program? Request a visit. We'll bring the cars, the energy, and unforgettable moments directly to your kids.</p>
-                    <a href="#contact" class="involvement-link">Request a Visit →</a>
+                    <button onclick="openModal('visit')" class="involvement-link">Request a Visit →</button>
                 </div>
                 
                 <div class="involvement-card">
@@ -218,9 +218,9 @@
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                         </svg>
                     </div>
-                    <h3 class="involvement-title">Sponsors & Supporters</h3>
+                    <h3 class="involvement-title">Support Cars & Kids</h3>
                     <p class="involvement-description">Help us reach more kids and create more moments. Your support fuels the experiences that transfer energy and build lasting memories.</p>
-                    <a href="#contact" class="involvement-link">Support Our Mission →</a>
+                    <button onclick="openModal('support')" class="involvement-link">Support Our Mission →</button>
                 </div>
             </div>
         </div>
@@ -229,66 +229,22 @@
     <!-- Contact Section -->
     <section id="contact" class="section contact">
         <div class="container">
-            <h2 class="section-title">Contact Us</h2>
-            <p class="section-subtitle">Ready to get involved? Have questions? We'd love to hear from you.</p>
-            
-            <div class="contact-wrapper">
-                <form class="contact-form" action="https://formspree.io/f/info@carsandkids.net" method="POST">
-                    <div class="form-group">
-                        <label for="name">Name</label>
-                        <input type="text" id="name" name="name" required placeholder="Your name">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" required placeholder="your@email.com">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="type">I am a...</label>
-                        <select id="type" name="type" required>
-                            <option value="" disabled selected>Select an option</option>
-                            <option value="volunteer">Volunteer with a car</option>
-                            <option value="organization">Organization requesting a visit</option>
-                            <option value="sponsor">Potential sponsor or supporter</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="message">Message</label>
-                        <textarea id="message" name="message" rows="4" required placeholder="Tell us about yourself or your organization..."></textarea>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-submit">Send Message</button>
-                </form>
-                
-                <div class="contact-info">
-                    <div class="contact-info-item">
-                        <div class="contact-info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                <polyline points="22,6 12,13 2,6"></polyline>
-                            </svg>
-                        </div>
-                        <div class="contact-info-content">
-                            <h4>Email</h4>
-                            <a href="mailto:info@carsandkids.net">info@carsandkids.net</a>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-info-item">
-                        <div class="contact-info-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                            </svg>
-                        </div>
-                        <div class="contact-info-content">
-                            <h4>Our Mission</h4>
-                            <p>Transferring energy through shared experiences</p>
-                        </div>
-                    </div>
+            <div class="contact-simple">
+                <div class="contact-icon-large">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
                 </div>
+                <h2 class="section-title">Get in Touch</h2>
+                <p class="contact-subtitle">Questions? Ideas? Just want to say hello? We'd love to hear from you.</p>
+                <a href="mailto:info@carsandkids.net" class="btn btn-primary btn-email">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    info@carsandkids.net
+                </a>
             </div>
         </div>
     </section>
@@ -312,7 +268,7 @@
                     <a href="#what-we-do">What We Do</a>
                     <a href="#why-it-matters">Why It Matters</a>
                     <a href="#get-involved">Get Involved</a>
-                    <a href="#contact">Contact</a>
+                    <a href="mailto:info@carsandkids.net">Contact</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -320,6 +276,75 @@
             </div>
         </div>
     </footer>
+
+    <!-- Drive With Us Modal -->
+    <div id="driveModal" class="modal" onclick="closeModalOnBackdrop(event, 'drive')">
+        <div class="modal-content modal-form">
+            <button class="modal-close" onclick="closeModal('drive')" aria-label="Close modal">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title">Drive With Us</h2>
+                <p class="modal-subtitle">Share your car and make a difference for kids.</p>
+            </div>
+            <div class="modal-body">
+                <iframe 
+                    src="https://docs.google.com/forms/d/e/1FAIpQLSeqvNnD5h6_1Ak-nOhmW400GTZzQagWAqgWYrMPYwwfPPzoSw/viewform?embedded=true" 
+                    width="100%" 
+                    height="100%" 
+                    frameborder="0" 
+                    marginheight="0" 
+                    marginwidth="0"
+                    loading="lazy">
+                    Loading…
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Host a Visit Modal -->
+    <div id="visitModal" class="modal" onclick="closeModalOnBackdrop(event, 'visit')">
+        <div class="modal-content modal-form">
+            <button class="modal-close" onclick="closeModal('visit')" aria-label="Close modal">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title">Host a Visit</h2>
+                <p class="modal-subtitle">Request a Cars & Kids visit for your organization.</p>
+            </div>
+            <div class="modal-body">
+                <iframe 
+                    src="https://docs.google.com/forms/d/e/1FAIpQLSdTQD-Vf5sN-sY7c1f6nkTZuQO65caPEFepwRiSW5o_svbN-g/viewform?embedded=true" 
+                    width="100%" 
+                    height="100%" 
+                    frameborder="0" 
+                    marginheight="0" 
+                    marginwidth="0"
+                    loading="lazy">
+                    Loading…
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Modal -->
+    <div id="supportModal" class="modal" onclick="closeModalOnBackdrop(event, 'support')">
+        <div class="modal-content modal-form">
+            <button class="modal-close" onclick="closeModal('support')" aria-label="Close modal">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title">Support Cars & Kids</h2>
+                <p class="modal-subtitle">Help us reach more kids and create more moments.</p>
+            </div>
+            <div class="modal-body">
+                <iframe 
+                    src="https://docs.google.com/forms/d/e/1FAIpQLSeDS4DtGdjeYgkThJCMBqloBDQcoRZeMG7y3Z-WPWHghwZn4w/viewform?embedded=true" 
+                    width="100%" 
+                    height="100%" 
+                    frameborder="0" 
+                    marginheight="0" 
+                    marginwidth="0"
+                    loading="lazy">
+                    Loading…
+                </iframe>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Smooth scroll for navigation links
@@ -387,6 +412,36 @@
 
         document.querySelectorAll('.card, .value-item, .involvement-card').forEach(el => {
             observer.observe(el);
+        });
+
+        // Modal functions
+        function openModal(type) {
+            const modalId = type + 'Modal';
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(type) {
+            const modalId = type + 'Modal';
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function closeModalOnBackdrop(event, type) {
+            const modalId = type + 'Modal';
+            if (event.target.id === modalId) {
+                closeModal(type);
+            }
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                document.body.style.overflow = 'auto';
+            }
         });
     </script>
 </body>

@@ -604,6 +604,11 @@ body {
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: inherit;
 }
 
 .involvement-link:hover {
@@ -612,119 +617,146 @@ body {
 }
 
 /* ============================================
-   Contact Section
+   Contact Section (Simplified)
    ============================================ */
 .contact {
-    background: var(--white);
+    background: linear-gradient(180deg, var(--warm-bg) 0%, var(--white) 100%);
+    padding: 100px 0;
 }
 
-.contact-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 60px;
-    align-items: start;
+.contact-simple {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-.contact-form {
-    background: var(--gray-50);
-    border-radius: 20px;
-    padding: 40px;
-}
-
-.form-group {
-    margin-bottom: 24px;
-}
-
-.form-group label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--gray-700);
-    margin-bottom: 8px;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 14px 18px;
-    font-size: 16px;
-    font-family: inherit;
-    border: 2px solid var(--gray-200);
-    border-radius: 12px;
-    background: var(--white);
-    color: var(--gray-800);
-    transition: all 0.2s ease;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
-}
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-    color: var(--gray-400);
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 120px;
-}
-
-.btn-submit {
-    width: 100%;
-}
-
-.contact-info {
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-    padding-top: 20px;
-}
-
-.contact-info-item {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-}
-
-.contact-info-icon {
-    width: 52px;
-    height: 52px;
-    min-width: 52px;
+.contact-icon-large {
+    width: 100px;
+    height: 100px;
     background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    border-radius: 14px;
+    border-radius: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--white);
+    margin: 0 auto 32px;
 }
 
-.contact-info-content h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--gray-800);
-    margin-bottom: 4px;
-}
-
-.contact-info-content a {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-.contact-info-content a:hover {
-    color: var(--accent-dark);
-}
-
-.contact-info-content p {
+.contact-subtitle {
+    font-size: 18px;
     color: var(--gray-600);
-    font-size: 15px;
+    margin-bottom: 32px;
+    line-height: 1.7;
+}
+
+.btn-email {
+    gap: 12px;
+    font-size: 18px;
+    padding: 18px 40px;
+}
+
+.btn-email svg {
+    flex-shrink: 0;
+}
+
+/* ============================================
+   Modals
+   ============================================ */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: var(--white);
+    border-radius: 20px;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    position: relative;
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal.active .modal-content {
+    transform: translateY(0) scale(1);
+}
+
+.modal-form {
+    height: 85vh;
+    max-height: 800px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    background: var(--gray-100);
+    border: none;
+    border-radius: 10px;
+    font-size: 24px;
+    color: var(--gray-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.modal-close:hover {
+    background: var(--gray-200);
+    color: var(--gray-800);
+}
+
+.modal-header {
+    padding: 32px 32px 20px;
+    border-bottom: 1px solid var(--gray-100);
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 8px;
+    padding-right: 40px;
+}
+
+.modal-subtitle {
+    font-size: 16px;
+    color: var(--gray-600);
+}
+
+.modal-body {
+    flex: 1;
+    overflow: hidden;
+}
+
+.modal-body iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
 }
 
 /* ============================================
@@ -796,22 +828,6 @@ body {
 /* ============================================
    Responsive Design
    ============================================ */
-@media (max-width: 1024px) {
-    .contact-wrapper {
-        grid-template-columns: 1fr;
-    }
-    
-    .contact-info {
-        flex-direction: row;
-        flex-wrap: wrap;
-        padding-top: 0;
-    }
-    
-    .contact-info-item {
-        flex: 1;
-        min-width: 250px;
-    }
-}
 
 @media (max-width: 768px) {
     .header-nav {
@@ -864,12 +880,53 @@ body {
         gap: 20px;
     }
     
-    .contact-info {
-        flex-direction: column;
+    /* Modal responsive */
+    .modal {
+        padding: 10px;
     }
     
-    .contact-form {
-        padding: 28px;
+    .modal-content {
+        max-height: 95vh;
+        border-radius: 16px;
+    }
+    
+    .modal-form {
+        height: 90vh;
+    }
+    
+    .modal-header {
+        padding: 24px 24px 16px;
+    }
+    
+    .modal-title {
+        font-size: 22px;
+    }
+    
+    .modal-close {
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+    }
+    
+    /* Contact responsive */
+    .contact {
+        padding: 80px 0;
+    }
+    
+    .contact-icon-large {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .contact-icon-large svg {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .btn-email {
+        font-size: 16px;
+        padding: 16px 32px;
     }
 }
 
