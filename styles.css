@@ -13,6 +13,10 @@
     --accent: #e63946;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: 'Inter', -apple-system, sans-serif;
     color: var(--black);
@@ -91,13 +95,8 @@ main {
     margin-bottom: 32px;
 }
 
-.hero-actions {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-}
-
 .btn-primary {
+    display: inline-block;
     background: var(--black);
     color: var(--white);
     padding: 14px 28px;
@@ -109,16 +108,6 @@ main {
 
 .btn-primary:hover {
     background: #333;
-}
-
-.btn-text {
-    color: var(--gray);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.btn-text:hover {
-    color: var(--black);
 }
 
 .hero-image {
@@ -146,36 +135,35 @@ main {
     object-fit: cover;
 }
 
-/* Belief */
-.belief {
+/* About */
+.about {
     padding: 100px 48px;
-    background: var(--gray-bg);
+    background: var(--white);
 }
 
-.belief-content {
+.about-content {
     max-width: 600px;
-    margin: 0 auto;
-    text-align: center;
 }
 
-.belief h2 {
-    font-size: 14px;
+.about-label {
+    font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--gray);
-    margin-bottom: 24px;
+    color: var(--gray-light);
+    margin-bottom: 16px;
 }
 
-.belief p {
-    font-size: 20px;
-    line-height: 1.7;
-    color: var(--black);
+.about h2 {
+    font-size: 32px;
+    font-weight: 700;
     margin-bottom: 20px;
 }
 
-.belief p:last-child {
-    margin-bottom: 0;
+.about p {
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--gray);
 }
 
 /* Full Image */
@@ -189,51 +177,36 @@ main {
     object-fit: cover;
 }
 
-/* Help Section */
-.help {
-    padding: 80px 48px;
+/* Belief */
+.belief {
+    padding: 100px 48px;
+    background: var(--gray-bg);
 }
 
-.help h2 {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 40px;
+.belief-content {
+    max-width: 600px;
+    margin: 0 auto;
     text-align: center;
 }
 
-.help-options {
-    max-width: 500px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
+.belief-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-light);
+    margin-bottom: 24px;
 }
 
-.help-option {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 0;
-    border-bottom: 1px solid #eee;
-    text-decoration: none;
-    color: var(--black);
-}
-
-.help-option:first-child {
-    border-top: 1px solid #eee;
-}
-
-.help-option:hover {
-    color: var(--accent);
-}
-
-.help-label {
-    font-size: 18px;
-    font-weight: 500;
-}
-
-.help-arrow {
+.belief p {
     font-size: 20px;
-    color: var(--accent);
+    line-height: 1.7;
+    color: var(--black);
+    margin-bottom: 20px;
+}
+
+.belief p:last-child {
+    margin-bottom: 0;
 }
 
 /* Photo Row */
@@ -249,6 +222,106 @@ main {
     object-fit: cover;
 }
 
+/* Get Involved */
+.get-involved {
+    padding: 100px 48px;
+    background: var(--white);
+}
+
+.get-involved h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.get-involved-intro {
+    font-size: 18px;
+    color: var(--gray);
+    margin-bottom: 40px;
+    max-width: 500px;
+}
+
+.involve-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 900px;
+}
+
+.involve-card {
+    background: var(--gray-bg);
+    padding: 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+.involve-card:hover {
+    background: #eee;
+}
+
+.involve-card h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.involve-card h3 span {
+    color: var(--accent);
+}
+
+.involve-card p {
+    font-size: 14px;
+    color: var(--gray);
+    line-height: 1.6;
+}
+
+/* Contact */
+.contact {
+    padding: 100px 48px;
+    background: var(--gray-bg);
+}
+
+.contact h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.contact-intro {
+    font-size: 17px;
+    color: var(--gray);
+    margin-bottom: 32px;
+}
+
+.contact-email {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    color: var(--black);
+    text-decoration: none;
+    padding: 16px 24px;
+    background: var(--white);
+    border-radius: 8px;
+}
+
+.contact-email:hover {
+    background: #eee;
+}
+
+.contact-email svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--gray);
+}
+
 /* Footer */
 .footer {
     display: flex;
@@ -256,7 +329,6 @@ main {
     align-items: center;
     padding: 48px;
     border-top: 1px solid #eee;
-    margin-top: 80px;
 }
 
 .footer-logo {
@@ -283,204 +355,6 @@ main {
 
 .footer-email:hover {
     color: var(--black);
-}
-
-/* Mobile */
-@media (max-width: 900px) {
-    .nav {
-        padding: 20px 24px;
-    }
-    
-    .nav-links {
-        gap: 20px;
-    }
-    
-    .hero {
-        grid-template-columns: 1fr;
-        padding: 24px;
-        min-height: auto;
-    }
-    
-    .hero-text {
-        order: 1;
-    }
-    
-    .hero-image {
-        order: 0;
-        min-height: 300px;
-    }
-    
-    .photo-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .photo-grid img {
-        height: 250px;
-    }
-    
-    .belief {
-        padding: 60px 24px;
-    }
-    
-    .belief p {
-        font-size: 18px;
-    }
-    
-    .full-image img {
-        height: 300px;
-    }
-    
-    .help {
-        padding: 60px 24px;
-    }
-    
-    .photo-row {
-        grid-template-columns: 1fr;
-    }
-    
-    .photo-row img {
-        height: 250px;
-    }
-    
-    .footer {
-        flex-direction: column;
-        gap: 24px;
-        text-align: center;
-        padding: 40px 24px;
-    }
-}
-
-@media (max-width: 600px) {
-    .nav-links {
-        display: none;
-    }
-    
-    .hero-text h1 {
-        font-size: 32px;
-    }
-    
-    .hero-actions {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-    }
-}
-
-/* Page styles */
-.page {
-    padding: 120px 48px 80px;
-    max-width: 700px;
-    margin: 0 auto;
-}
-
-.page-back {
-    display: inline-block;
-    color: var(--gray);
-    text-decoration: none;
-    font-size: 14px;
-    margin-bottom: 40px;
-}
-
-.page-back:hover {
-    color: var(--black);
-}
-
-.page h1 {
-    font-size: clamp(36px, 5vw, 48px);
-    font-weight: 700;
-    margin-bottom: 16px;
-    letter-spacing: -0.02em;
-}
-
-.page-intro {
-    font-size: 18px;
-    color: var(--gray);
-    margin-bottom: 48px;
-}
-
-.page-section {
-    margin-bottom: 48px;
-}
-
-.page-section h2 {
-    font-size: 14px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--gray);
-    margin-bottom: 16px;
-}
-
-.page-section p {
-    font-size: 17px;
-    line-height: 1.8;
-    color: var(--black);
-    margin-bottom: 16px;
-}
-
-.page-section p:last-child {
-    margin-bottom: 0;
-}
-
-/* Get Involved Cards */
-.involve-card {
-    display: block;
-    background: var(--gray-bg);
-    padding: 28px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    cursor: pointer;
-    border: none;
-    width: 100%;
-    text-align: left;
-    font-family: inherit;
-    transition: background 0.2s;
-}
-
-.involve-card:hover {
-    background: #eee;
-}
-
-.involve-card h3 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.involve-card h3 span {
-    color: var(--accent);
-}
-
-.involve-card p {
-    font-size: 15px;
-    color: var(--gray);
-    line-height: 1.6;
-}
-
-/* Contact */
-.contact-email {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 20px;
-    color: var(--black);
-    text-decoration: none;
-    padding: 20px 28px;
-    background: var(--gray-bg);
-    border-radius: 8px;
-}
-
-.contact-email:hover {
-    background: #eee;
-}
-
-.contact-email svg {
-    width: 24px;
-    height: 24px;
-    stroke: var(--gray);
 }
 
 /* Modal */
@@ -568,8 +442,76 @@ main {
     border: none;
 }
 
+/* Mobile */
+@media (max-width: 900px) {
+    .nav {
+        padding: 20px 24px;
+    }
+    
+    .nav-links {
+        gap: 20px;
+    }
+    
+    .hero {
+        grid-template-columns: 1fr;
+        padding: 24px;
+        min-height: auto;
+    }
+    
+    .hero-text {
+        order: 1;
+    }
+    
+    .hero-image {
+        order: 0;
+        min-height: 300px;
+    }
+    
+    .photo-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .photo-grid img {
+        height: 250px;
+    }
+    
+    .about,
+    .belief,
+    .get-involved,
+    .contact {
+        padding: 60px 24px;
+    }
+    
+    .full-image img {
+        height: 300px;
+    }
+    
+    .photo-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .photo-row img {
+        height: 250px;
+    }
+    
+    .involve-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer {
+        flex-direction: column;
+        gap: 24px;
+        text-align: center;
+        padding: 40px 24px;
+    }
+}
+
 @media (max-width: 600px) {
-    .page {
-        padding: 100px 24px 60px;
+    .nav-links {
+        display: none;
+    }
+    
+    .hero-text h1 {
+        font-size: 32px;
     }
 }

@@ -15,9 +15,9 @@
     <nav class="nav">
         <a href="/" class="nav-logo">Cars <span>&</span> Kids</a>
         <div class="nav-links">
-            <a href="/about/">About</a>
-            <a href="/get-involved/">Get Involved</a>
-            <a href="/contact/">Contact</a>
+            <a href="#about">About</a>
+            <a href="#get-involved">Get Involved</a>
+            <a href="#contact">Contact</a>
         </div>
     </nav>
 
@@ -27,10 +27,7 @@
             <div class="hero-text">
                 <h1>Cool cars for kids who need a lift.</h1>
                 <p>We show up at hospitals, schools, and community centers with incredible cars—and let kids have a moment.</p>
-                <div class="hero-actions">
-                    <a href="/get-involved/" class="btn-primary">Get Involved</a>
-                    <a href="mailto:info@carsandkids.net" class="btn-text">Say hello →</a>
-                </div>
+                <a href="#get-involved" class="btn-primary">Get Involved</a>
             </div>
             <div class="hero-image">
                 <img src="images/car1.jpg" alt="Car at event">
@@ -44,12 +41,12 @@
             <img src="images/car6.jpg" alt="Car">
         </section>
 
-        <!-- Belief -->
-        <section class="belief">
-            <div class="belief-content">
-                <h2>What we believe</h2>
-                <p>We believe in a fundamental energy and momentum. Sometimes what kids need is a little fun and excitement for empowerment—a moment that breaks the routine.</p>
-                <p>We believe in the visceral experience of a car—auditory, visual, and physical—having the power to invigorate.</p>
+        <!-- About -->
+        <section id="about" class="about">
+            <div class="about-content">
+                <div class="about-label">About</div>
+                <h2>What we do</h2>
+                <p>We show up with a handful of incredible cars—classics, exotics, whatever we've got—and let kids climb in, hear the engines, and just have a moment. We visit hospitals, schools, and community programs. No agenda. Just cars and good energy.</p>
             </div>
         </section>
 
@@ -58,29 +55,55 @@
             <img src="images/car3.jpeg" alt="Cars & Kids event">
         </section>
 
-        <!-- How to Help -->
-        <section class="help">
-            <h2>Want to help?</h2>
-            <div class="help-options">
-                <a href="/get-involved/" class="help-option">
-                    <span class="help-label">Bring your car</span>
-                    <span class="help-arrow">→</span>
-                </a>
-                <a href="/get-involved/" class="help-option">
-                    <span class="help-label">Request a visit</span>
-                    <span class="help-arrow">→</span>
-                </a>
-                <a href="/get-involved/" class="help-option">
-                    <span class="help-label">Support us</span>
-                    <span class="help-arrow">→</span>
-                </a>
+        <!-- Belief -->
+        <section class="belief">
+            <div class="belief-content">
+                <div class="belief-label">What we believe</div>
+                <p>We believe in a fundamental energy and momentum. Sometimes what kids need is a little fun and excitement for empowerment—a moment that breaks the routine.</p>
+                <p>We believe in the visceral experience of a car—auditory, visual, and physical—having the power to invigorate.</p>
             </div>
         </section>
 
-        <!-- More Photos -->
+        <!-- Photo Row -->
         <section class="photo-row">
             <img src="images/cars4.webp" alt="Car">
             <img src="images/car7.jpg" alt="Car">
+        </section>
+
+        <!-- Get Involved -->
+        <section id="get-involved" class="get-involved">
+            <h2>Get Involved</h2>
+            <p class="get-involved-intro">There are a few ways you can help us bring cool cars to kids.</p>
+            
+            <div class="involve-cards">
+                <button onclick="openModal('drive')" class="involve-card">
+                    <h3><span>→</span> Bring your car</h3>
+                    <p>Have a cool car? Classic, exotic, or just something special—share it with kids who'd love to see it.</p>
+                </button>
+
+                <button onclick="openModal('visit')" class="involve-card">
+                    <h3><span>→</span> Request a visit</h3>
+                    <p>Hospital, school, or community program? Request a visit and we'll bring the cars to you.</p>
+                </button>
+
+                <button onclick="openModal('support')" class="involve-card">
+                    <h3><span>→</span> Support us</h3>
+                    <p>Help us reach more kids. Your support makes these moments possible.</p>
+                </button>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact" class="contact">
+            <h2>Contact</h2>
+            <p class="contact-intro">For inquiries, partnerships, or general information, please reach out.</p>
+            <a href="mailto:info@carsandkids.net" class="contact-email">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                info@carsandkids.net
+            </a>
         </section>
     </main>
 
@@ -91,5 +114,79 @@
         </div>
         <a href="mailto:info@carsandkids.net" class="footer-email">info@carsandkids.net</a>
     </footer>
+
+    <!-- Modals -->
+    <div id="driveModal" class="modal" onclick="closeModalOnBackdrop(event, 'drive')">
+        <div class="modal-content modal-form">
+            <button class="modal-close" onclick="closeModal('drive')">&times;</button>
+            <div class="modal-header">
+                <h2>Bring your car</h2>
+                <p>Share your car and make a kid's day.</p>
+            </div>
+            <div class="modal-body">
+                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeqvNnD5h6_1Ak-nOhmW400GTZzQagWAqgWYrMPYwwfPPzoSw/viewform?embedded=true" width="100%" height="100%" frameborder="0" loading="lazy">Loading…</iframe>
+            </div>
+        </div>
+    </div>
+
+    <div id="visitModal" class="modal" onclick="closeModalOnBackdrop(event, 'visit')">
+        <div class="modal-content modal-form">
+            <button class="modal-close" onclick="closeModal('visit')">&times;</button>
+            <div class="modal-header">
+                <h2>Request a visit</h2>
+                <p>Request a Cars & Kids visit for your organization.</p>
+            </div>
+            <div class="modal-body">
+                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdTQD-Vf5sN-sY7c1f6nkTZuQO65caPEFepwRiSW5o_svbN-g/viewform?embedded=true" width="100%" height="100%" frameborder="0" loading="lazy">Loading…</iframe>
+            </div>
+        </div>
+    </div>
+
+    <div id="supportModal" class="modal" onclick="closeModalOnBackdrop(event, 'support')">
+        <div class="modal-content modal-form">
+            <button class="modal-close" onclick="closeModal('support')">&times;</button>
+            <div class="modal-header">
+                <h2>Support us</h2>
+                <p>Help us reach more kids.</p>
+            </div>
+            <div class="modal-body">
+                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeDS4DtGdjeYgkThJCMBqloBDQcoRZeMG7y3Z-WPWHghwZn4w/viewform?embedded=true" width="100%" height="100%" frameborder="0" loading="lazy">Loading…</iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Modal functions
+        function openModal(type) {
+            document.getElementById(type + 'Modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        function closeModalOnBackdrop(event, type) {
+            if (event.target.id === type + 'Modal') closeModal(type);
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
 </body>
 </html>
