@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cars & Kids</title>
-    <meta name="description" content="We bring cool cars to kids in hospitals, schools, and anywhere they could use some excitement.">
+    <title>Contact - Cars & Kids</title>
+    <meta name="description" content="Get in touch with Cars & Kids.">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='12' fill='%23111'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='40' font-weight='bold' fill='%23e63946' text-anchor='middle'%3EC%26K%3C/text%3E%3C/svg%3E">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Header -->
-    <header class="header">
+    <header class="header scrolled">
         <div class="header-container">
             <a href="/" class="header-logo">
                 <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -26,7 +26,7 @@
             <nav class="header-nav">
                 <a href="/about/" class="nav-link">About</a>
                 <a href="/get-involved/" class="nav-link">Get Involved</a>
-                <a href="/contact/" class="nav-link">Contact</a>
+                <a href="/contact/" class="nav-link active">Contact</a>
             </nav>
             <button class="mobile-menu-btn" aria-label="Menu">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -45,42 +45,20 @@
         <a href="/contact/" class="mobile-nav-link">Contact</a>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Cars <span class="title-ampersand">&</span> Kids</h1>
-            <p class="hero-description">We bring cool cars to kids who could use some excitement. Hospitals. Schools. Anywhere kids need a lift.</p>
-            <div class="hero-ctas">
-                <a href="/get-involved/" class="btn btn-primary">Get Involved</a>
-                <a href="/contact/" class="btn btn-secondary">Say Hello</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section class="section about">
+    <!-- Contact Page Content -->
+    <section class="page-section">
         <div class="container">
-            <h2 class="section-title">What We Do</h2>
-            <p class="about-text">We show up with a handful of incredible cars—classics, exotics, whatever we've got—and let kids climb in, hear the engines, and just have a moment. No agenda. Just cars and good energy.</p>
-        </div>
-    </section>
-
-    <!-- Get Involved Section -->
-    <section class="section get-involved">
-        <div class="container">
-            <h2 class="section-title">Want to Help?</h2>
-            <div class="involve-links">
-                <a href="/get-involved/" class="involve-link">
-                    <span class="involve-arrow">→</span>
-                    Bring your car
-                </a>
-                <a href="/get-involved/" class="involve-link">
-                    <span class="involve-arrow">→</span>
-                    Host a visit
-                </a>
-                <a href="/get-involved/" class="involve-link">
-                    <span class="involve-arrow">→</span>
-                    Support us
+            <a href="/" class="back-link">← Back home</a>
+            <h1 class="page-title">Contact</h1>
+            <p class="page-subtitle">Questions? Ideas? Just want to say hello? We'd love to hear from you.</p>
+            
+            <div class="contact-content">
+                <a href="mailto:info@carsandkids.net" class="contact-email-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    info@carsandkids.net
                 </a>
             </div>
         </div>
@@ -112,16 +90,6 @@
     </footer>
 
     <script>
-        // Header scroll effect
-        window.addEventListener('scroll', () => {
-            const header = document.querySelector('.header');
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-
         // Mobile menu toggle
         document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
             this.classList.toggle('active');
