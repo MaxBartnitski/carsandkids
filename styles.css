@@ -88,6 +88,12 @@ main {
     border-radius: 8px;
 }
 
+.hero-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 .hero-text h1 {
     font-size: clamp(32px, 4vw, 48px);
     font-weight: 700;
