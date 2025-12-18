@@ -92,6 +92,8 @@ main {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: flex-start;
+    height: 100%;
 }
 
 .hero-text h1 {
@@ -108,6 +110,10 @@ main {
     max-width: 400px;
     margin-bottom: 32px;
     line-height: 1.6;
+}
+
+.hero-text .btn-primary {
+    width: auto;
 }
 
 .btn-primary {
