@@ -81,6 +81,10 @@ main {
 
 .hero-text {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
 .hero-image {
@@ -109,10 +113,6 @@ main {
     max-width: 400px;
     margin-bottom: 32px;
     line-height: 1.6;
-}
-
-.hero-text .btn-primary {
-    width: auto;
 }
 
 .btn-primary {
