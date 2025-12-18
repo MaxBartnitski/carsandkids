@@ -179,6 +179,36 @@ main {
     object-fit: cover;
 }
 
+/* Why Cars */
+.why-cars {
+    padding: 80px 24px;
+    background: var(--white);
+}
+
+.why-cars-content {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.why-cars h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 24px;
+}
+
+.why-cars p {
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--black);
+    margin-bottom: 20px;
+}
+
+.why-cars p:last-child {
+    margin-bottom: 0;
+}
+
 /* Belief */
 .belief {
     padding: 80px 24px;
@@ -503,6 +533,7 @@ main {
     }
     
     .about,
+    .why-cars,
     .belief,
     .get-involved,
     .contact {
@@ -510,6 +541,7 @@ main {
     }
     
     .about p,
+    .why-cars p,
     .belief p {
         font-size: 16px;
     }
