@@ -10,7 +10,7 @@
     --gray-light: #999;
     --gray-bg: #f7f7f7;
     --white: #fff;
-    --accent: #e63946;
+    --accent: #2563eb; /* Modern blue */
 }
 
 html {
@@ -143,27 +143,23 @@ main {
 
 .about-content {
     max-width: 600px;
-}
-
-.about-label {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--gray-light);
-    margin-bottom: 16px;
+    margin: 0 auto;
+    text-align: center;
 }
 
 .about h2 {
-    font-size: 32px;
+    font-size: 14px;
     font-weight: 700;
-    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--black);
+    margin-bottom: 24px;
 }
 
 .about p {
-    font-size: 18px;
-    line-height: 1.8;
-    color: var(--gray);
+    font-size: 20px;
+    line-height: 1.7;
+    color: var(--black);
 }
 
 /* Full Image */
@@ -190,11 +186,11 @@ main {
 }
 
 .belief-label {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--gray-light);
+    color: var(--black);
     margin-bottom: 24px;
 }
 
