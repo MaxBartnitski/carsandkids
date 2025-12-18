@@ -145,14 +145,12 @@ main {
 
 /* About */
 .about {
-    padding: 80px 24px;
+    padding: 80px 48px;
     background: var(--white);
 }
 
 .about-content {
-    max-width: 600px;
-    margin: 0 auto;
-    text-align: center;
+    text-align: left;
 }
 
 .about h2 {
@@ -181,14 +179,12 @@ main {
 
 /* Why Cars */
 .why-cars {
-    padding: 80px 24px;
+    padding: 80px 48px;
     background: var(--white);
 }
 
 .why-cars-content {
-    max-width: 600px;
-    margin: 0 auto;
-    text-align: center;
+    text-align: left;
 }
 
 .why-cars h2 {
@@ -211,14 +207,12 @@ main {
 
 /* Belief */
 .belief {
-    padding: 80px 24px;
+    padding: 80px 48px;
     background: var(--gray-bg);
 }
 
 .belief-content {
-    max-width: 600px;
-    margin: 0 auto;
-    text-align: center;
+    text-align: left;
 }
 
 .belief-label {
@@ -254,33 +248,22 @@ main {
 
 /* Get Involved */
 .get-involved {
-    padding: 80px 24px;
+    padding: 80px 48px;
     background: var(--white);
-    text-align: center;
+    text-align: left;
 }
 
 .get-involved h2 {
     font-size: 28px;
     font-weight: 700;
     color: var(--black);
-    margin-bottom: 16px;
-}
-
-.get-involved-intro {
-    font-size: 18px;
-    color: var(--gray);
-    margin-bottom: 40px;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-bottom: 32px;
 }
 
 .involve-cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
-    max-width: 800px;
-    margin: 0 auto;
 }
 
 .involve-card {
@@ -289,7 +272,7 @@ main {
     border-radius: 8px;
     cursor: pointer;
     border: none;
-    text-align: center;
+    text-align: left;
     font-family: inherit;
     transition: background 0.2s;
 }
@@ -302,7 +285,6 @@ main {
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 8px;
-    justify-content: center;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -320,9 +302,9 @@ main {
 
 /* Contact */
 .contact {
-    padding: 80px 24px;
+    padding: 80px 48px;
     background: var(--gray-bg);
-    text-align: center;
+    text-align: left;
 }
 
 .contact h2 {
@@ -537,7 +519,7 @@ main {
     .belief,
     .get-involved,
     .contact {
-        padding: 60px 20px;
+        padding: 60px 24px;
     }
     
     .about p,
