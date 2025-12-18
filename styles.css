@@ -145,10 +145,8 @@ main {
 }
 
 .about h2 {
-    font-size: 14px;
+    font-size: 28px;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
     color: var(--black);
     margin-bottom: 24px;
 }
@@ -183,10 +181,8 @@ main {
 }
 
 .belief-label {
-    font-size: 14px;
+    font-size: 28px;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
     color: var(--black);
     margin-bottom: 24px;
 }
@@ -223,12 +219,10 @@ main {
 }
 
 .get-involved h2 {
-    font-size: 14px;
+    font-size: 28px;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
     color: var(--black);
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .get-involved-intro {
@@ -291,12 +285,10 @@ main {
 }
 
 .contact h2 {
-    font-size: 14px;
+    font-size: 28px;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
     color: var(--black);
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .contact-intro {
