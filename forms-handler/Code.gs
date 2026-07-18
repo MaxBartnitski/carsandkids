@@ -63,7 +63,7 @@ function setupIntakeSheet() {
     var existing = sheet.getLastRow() >= 1 ? sheet.getRange(1, 1, 1, headers.length).getValues()[0] : [];
     var needsHeaders = existing.join('') === '' || existing[0] !== headers[0];
     if (needsHeaders) {
-      sheet.clear();
+      // Update header row only — never clear the tab (would wipe live submissions).
       sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
       sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
       sheet.setFrozenRows(1);
@@ -95,6 +95,12 @@ function doGet(e) {
 }
 
 function handleSubmission_(e) {
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) {
+    return jsonResponse_({ ok: false, error: 'Server busy. Please try again in a moment.' });
+  }
+
+  var rollback = null;
   try {
     if (!e || !e.postData || !e.postData.contents) {
       throw new Error('Missing request body.');
@@ -115,14 +121,26 @@ function handleSubmission_(e) {
     var normalized = normalizeSubmission_(formType, data);
     validateSubmission_(formType, normalized);
 
-    appendSubmission_(formType, normalized);
+    // Append both tab rows, then email. On any later failure, roll back sheet writes
+    // so a client retry cannot create duplicate/partial intake rows.
+    rollback = appendSubmission_(formType, normalized);
     sendNotificationEmail_(formType, normalized);
     sendConfirmationEmail_(formType, normalized);
+    rollback = null;
 
     return jsonResponse_({ ok: true });
   } catch (err) {
+    if (rollback) {
+      try {
+        rollback();
+      } catch (rbErr) {
+        Logger.log('Rollback failed: ' + rbErr.message);
+      }
+    }
     Logger.log('Submission failed: ' + err.message);
     return jsonResponse_({ ok: false, error: err.message || 'Submission failed.' });
+  } finally {
+    lock.releaseLock();
   }
 }
 
@@ -194,6 +212,10 @@ function validateSubmission_(formType, data) {
   if (!data.email || !emailRe.test(data.email)) throw new Error('Valid email is required.');
 }
 
+/**
+ * Appends type-tab + All rows. Returns a rollback function that deletes those
+ * rows (in reverse order) if a later step in the intake pipeline fails.
+ */
 function appendSubmission_(formType, data) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   if (!ss) {
@@ -202,53 +224,71 @@ function appendSubmission_(formType, data) {
 
   var now = new Date();
   var status = CONFIG.STATUS_NEW;
+  var written = [];
 
-  if (formType === 'drive') {
-    appendRow_(ss, TAB.DRIVE, [
-      now, status, data.name, data.email, data.phone, data.car,
-      data.canDo.join('; '), data.availability, data.why,
-    ]);
-    appendRow_(ss, TAB.ALL, [
-      now, formType, status, data.name, data.email, data.phone, '',
-      buildDetails_({
-        car: data.car,
-        can_do: data.canDo.join('; '),
-        availability: data.availability,
-        why: data.why,
-      }),
-    ]);
-    return;
+  var rollbackWritten = function () {
+    for (var i = written.length - 1; i >= 0; i--) {
+      written[i].sheet.deleteRow(written[i].row);
+    }
+  };
+
+  var write = function (tabName, row) {
+    written.push(appendRow_(ss, tabName, row));
+  };
+
+  try {
+    if (formType === 'drive') {
+      write(TAB.DRIVE, [
+        now, status, data.name, data.email, data.phone, data.car,
+        data.canDo.join('; '), data.availability, data.why,
+      ]);
+      write(TAB.ALL, [
+        now, formType, status, data.name, data.email, data.phone, '',
+        buildDetails_({
+          car: data.car,
+          can_do: data.canDo.join('; '),
+          availability: data.availability,
+          why: data.why,
+        }),
+      ]);
+    } else if (formType === 'visit') {
+      write(TAB.VISIT, [
+        now, status, data.org, data.contact, data.email, data.phone, data.type,
+        data.kids, data.age, data.location, data.constraints, data.timing,
+      ]);
+      write(TAB.ALL, [
+        now, formType, status, data.contact, data.email, data.phone, data.org,
+        buildDetails_({
+          type: data.type,
+          kids: data.kids,
+          age: data.age,
+          location: data.location,
+          constraints: data.constraints,
+          timing: data.timing,
+        }),
+      ]);
+    } else {
+      write(TAB.SUPPORT, [
+        now, status, data.name, data.email, data.org, data.supportTypes.join('; '), data.notes,
+      ]);
+      write(TAB.ALL, [
+        now, formType, status, data.name, data.email, '', data.org,
+        buildDetails_({
+          support_types: data.supportTypes.join('; '),
+          notes: data.notes,
+        }),
+      ]);
+    }
+  } catch (writeErr) {
+    try {
+      rollbackWritten();
+    } catch (rbErr) {
+      Logger.log('Append rollback failed: ' + rbErr.message);
+    }
+    throw writeErr;
   }
 
-  if (formType === 'visit') {
-    appendRow_(ss, TAB.VISIT, [
-      now, status, data.org, data.contact, data.email, data.phone, data.type,
-      data.kids, data.age, data.location, data.constraints, data.timing,
-    ]);
-    appendRow_(ss, TAB.ALL, [
-      now, formType, status, data.contact, data.email, data.phone, data.org,
-      buildDetails_({
-        type: data.type,
-        kids: data.kids,
-        age: data.age,
-        location: data.location,
-        constraints: data.constraints,
-        timing: data.timing,
-      }),
-    ]);
-    return;
-  }
-
-  appendRow_(ss, TAB.SUPPORT, [
-    now, status, data.name, data.email, data.org, data.supportTypes.join('; '), data.notes,
-  ]);
-  appendRow_(ss, TAB.ALL, [
-    now, formType, status, data.name, data.email, '', data.org,
-    buildDetails_({
-      support_types: data.supportTypes.join('; '),
-      notes: data.notes,
-    }),
-  ]);
+  return rollbackWritten;
 }
 
 function appendRow_(ss, tabName, row) {
@@ -257,6 +297,7 @@ function appendRow_(ss, tabName, row) {
     throw new Error('Missing tab "' + tabName + '" — run setupIntakeSheet() first.');
   }
   sheet.appendRow(row);
+  return { sheet: sheet, row: sheet.getLastRow() };
 }
 
 function buildDetails_(fields) {

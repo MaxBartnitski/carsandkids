@@ -405,6 +405,7 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Sending…';
 
+            let succeeded = false;
             try {
                 const endpoint = getFormsEndpoint();
                 const response = await fetch(endpoint, {
@@ -425,17 +426,23 @@
                     throw new Error(result.error || 'Submission failed.');
                 }
 
+                succeeded = true;
                 form.reset();
                 showFormMessage(formType, 'success', 'Thank you! We received your message and will follow up soon.');
                 setTimeout(() => {
                     closeModal(modalType);
                     hideFormMessage(formType);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit';
                 }, 2500);
             } catch (err) {
                 showFormMessage(formType, 'error', err.message || 'Something went wrong. Please try again or email info@carsandkids.net.');
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit';
+                // Keep disabled through the success delay so users cannot double-submit.
+                if (!succeeded) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit';
+                }
             }
         }
 
