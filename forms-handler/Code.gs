@@ -117,7 +117,6 @@ function handleSubmission_(e) {
 
     appendSubmission_(formType, normalized);
     sendNotificationEmail_(formType, normalized);
-    sendConfirmationEmail_(formType, normalized);
 
     return jsonResponse_({ ok: true });
   } catch (err) {
@@ -279,28 +278,6 @@ function sendNotificationEmail_(formType, data) {
   });
 }
 
-function sendConfirmationEmail_(formType, data) {
-  var label = FORM_LABELS[formType];
-  var name = displayName_(formType, data);
-  var subject = 'We received your message — Cars & Kids';
-  var plain =
-    'Hi ' + name + ',\n\n' +
-    'Thanks for reaching out. We received your ' + label + ' and will follow up soon.\n\n' +
-    '— Cars & Kids\n' +
-    CONFIG.SITE_URL;
-
-  var html =
-    '<p>Hi ' + escapeHtml_(name) + ',</p>' +
-    '<p>Thanks for reaching out. We received your <strong>' + escapeHtml_(label) + '</strong> and will follow up soon.</p>' +
-    '<p>— Cars & Kids<br><a href="' + CONFIG.SITE_URL + '">' + CONFIG.SITE_URL + '</a></p>';
-
-  GmailApp.sendEmail(data.email, subject, plain, {
-    htmlBody: html,
-    name: CONFIG.FROM_NAME,
-    replyTo: CONFIG.FROM_EMAIL,
-  });
-}
-
 function buildNotifySubject_(formType, data) {
   var prefix = NOTIFY_PREFIX[formType];
   if (formType === 'drive') {
@@ -389,11 +366,6 @@ function buildNotifyHtml_(formType, data) {
     '<table style="border-collapse:collapse;">' + rows.join('') + '</table>' +
     '<p style="color:#666;margin-top:16px;">Reply to this email to reach the submitter.</p>'
   );
-}
-
-function displayName_(formType, data) {
-  if (formType === 'visit') return data.contact || 'there';
-  return data.name || 'there';
 }
 
 function escapeHtml_(text) {

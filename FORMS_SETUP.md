@@ -3,8 +3,7 @@
 Website modals POST to a **Google Apps Script** web app bound to a **Cars & Kids Intake** spreadsheet. Each submission:
 
 1. Appends a row to the Sheet (source of truth)
-2. Emails `info@carsandkids.net`
-3. Sends an auto-reply to the submitter from `info@carsandkids.net`
+2. Emails `info@carsandkids.net` (notification only — no auto-reply to submitter; website shows confirmation)
 
 ## Prerequisites
 
@@ -72,7 +71,7 @@ For each form (Drive, Visit, Support):
 
 - [ ] Row appears on **All** tab and the matching type tab
 - [ ] Notification arrives at **info@carsandkids.net**
-- [ ] Auto-reply arrives at the submitter email
+- [ ] Website shows the thank-you panel (no email to submitter)
 - [ ] Reply on the notification goes to the submitter
 
 Or run from repo:
