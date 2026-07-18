@@ -160,7 +160,6 @@
                         <label for="drive-website">Website</label>
                         <input type="text" id="drive-website" name="website" tabindex="-1" autocomplete="off">
                     </div>
-                    <div id="driveFormMessage" class="form-message hidden" role="alert"></div>
                     <div class="form-group">
                         <label for="drive-name">Full name</label>
                         <input type="text" id="drive-name" name="name" required>
@@ -201,8 +200,14 @@
                         <label for="drive-why">What drew you to Cars & Kids?</label>
                         <textarea id="drive-why" name="why" rows="3"></textarea>
                     </div>
+                    <div id="driveFormError" class="form-message error hidden" role="alert"></div>
                     <button type="submit" class="btn-submit">Submit</button>
                 </form>
+                <div id="driveFormSuccess" class="form-success hidden" role="status">
+                    <div class="form-success-icon" aria-hidden="true">✓</div>
+                    <h3>Thank you!</h3>
+                    <p>We received your message and will follow up soon.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -220,7 +225,6 @@
                         <label for="visit-website">Website</label>
                         <input type="text" id="visit-website" name="website" tabindex="-1" autocomplete="off">
                     </div>
-                    <div id="visitFormMessage" class="form-message hidden" role="alert"></div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="visit-org">Organization name</label>
@@ -269,8 +273,14 @@
                         <label for="visit-timing">Preferred timing (rough window)</label>
                         <input type="text" id="visit-timing" name="timing">
                     </div>
+                    <div id="visitFormError" class="form-message error hidden" role="alert"></div>
                     <button type="submit" class="btn-submit">Submit</button>
                 </form>
+                <div id="visitFormSuccess" class="form-success hidden" role="status">
+                    <div class="form-success-icon" aria-hidden="true">✓</div>
+                    <h3>Thank you!</h3>
+                    <p>We received your message and will follow up soon.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -288,7 +298,6 @@
                         <label for="support-website">Website</label>
                         <input type="text" id="support-website" name="website" tabindex="-1" autocomplete="off">
                     </div>
-                    <div id="supportFormMessage" class="form-message hidden" role="alert"></div>
                     <div class="form-group">
                         <label for="support-name">Name</label>
                         <input type="text" id="support-name" name="name" required>
@@ -328,8 +337,14 @@
                         <label for="support-notes">Anything else you'd like us to know?</label>
                         <textarea id="support-notes" name="notes" rows="3"></textarea>
                     </div>
+                    <div id="supportFormError" class="form-message error hidden" role="alert"></div>
                     <button type="submit" class="btn-submit">Submit</button>
                 </form>
+                <div id="supportFormSuccess" class="form-success hidden" role="status">
+                    <div class="form-success-icon" aria-hidden="true">✓</div>
+                    <h3>Thank you!</h3>
+                    <p>We received your message and will follow up soon.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -362,12 +377,14 @@
 
         // Modal functions
         function openModal(type) {
+            resetFormModal(type);
             document.getElementById(type + 'Modal').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
         function closeModal(type) {
             document.getElementById(type + 'Modal').classList.remove('active');
             document.body.style.overflow = 'auto';
+            resetFormModal(type);
         }
         function closeModalOnBackdrop(event, type) {
             if (event.target.id === type + 'Modal') closeModal(type);
@@ -387,21 +404,37 @@
             return url;
         }
 
-        function showFormMessage(formType, type, text) {
-            const el = document.getElementById(formType + 'FormMessage');
+        function showFormError(formType, text) {
+            const el = document.getElementById(formType + 'FormError');
             el.textContent = text;
-            el.className = 'form-message ' + type;
+            el.classList.remove('hidden');
         }
 
-        function hideFormMessage(formType) {
-            const el = document.getElementById(formType + 'FormMessage');
+        function hideFormError(formType) {
+            const el = document.getElementById(formType + 'FormError');
             el.textContent = '';
-            el.className = 'form-message hidden';
+            el.classList.add('hidden');
+        }
+
+        function showFormSuccess(formType) {
+            document.getElementById(formType + 'Form').classList.add('hidden');
+            document.getElementById(formType + 'FormSuccess').classList.remove('hidden');
+        }
+
+        function resetFormModal(formType) {
+            const form = document.getElementById(formType + 'Form');
+            form.classList.remove('hidden');
+            form.reset();
+            const submitBtn = form.querySelector('.btn-submit');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit';
+            hideFormError(formType);
+            document.getElementById(formType + 'FormSuccess').classList.add('hidden');
         }
 
         async function submitForm(formType, payload, form, modalType) {
             const submitBtn = form.querySelector('.btn-submit');
-            hideFormMessage(formType);
+            hideFormError(formType);
             submitBtn.disabled = true;
             submitBtn.textContent = 'Sending…';
 
@@ -426,14 +459,10 @@
                 }
 
                 form.reset();
-                showFormMessage(formType, 'success', 'Thank you! We received your message and will follow up soon.');
-                setTimeout(() => {
-                    closeModal(modalType);
-                    hideFormMessage(formType);
-                }, 2500);
+                showFormSuccess(formType);
+                setTimeout(() => closeModal(modalType), 3000);
             } catch (err) {
-                showFormMessage(formType, 'error', err.message || 'Something went wrong. Please try again or email info@carsandkids.net.');
-            } finally {
+                showFormError(formType, err.message || 'Something went wrong. Please try again or email info@carsandkids.net.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Submit';
             }
