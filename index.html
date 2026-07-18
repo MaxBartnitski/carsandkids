@@ -376,6 +376,16 @@
         });
 
         // Modal functions
+        const formModalCloseTimers = {};
+        const formModalSubmissionIds = { drive: 0, visit: 0, support: 0 };
+
+        function clearFormCloseTimer(formType) {
+            if (formModalCloseTimers[formType] != null) {
+                clearTimeout(formModalCloseTimers[formType]);
+                formModalCloseTimers[formType] = null;
+            }
+        }
+
         function openModal(type) {
             resetFormModal(type);
             document.getElementById(type + 'Modal').classList.add('active');
@@ -391,8 +401,10 @@
         }
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
-                document.body.style.overflow = 'auto';
+                document.querySelectorAll('.modal.active').forEach(m => {
+                    const type = m.id.replace(/Modal$/, '');
+                    closeModal(type);
+                });
             }
         });
 
@@ -422,6 +434,8 @@
         }
 
         function resetFormModal(formType) {
+            clearFormCloseTimer(formType);
+            formModalSubmissionIds[formType] += 1;
             const form = document.getElementById(formType + 'Form');
             form.classList.remove('hidden');
             form.reset();
@@ -433,6 +447,7 @@
         }
 
         async function submitForm(formType, payload, form, modalType) {
+            const submissionId = formModalSubmissionIds[formType];
             const submitBtn = form.querySelector('.btn-submit');
             hideFormError(formType);
             submitBtn.disabled = true;
@@ -458,10 +473,16 @@
                     throw new Error(result.error || 'Submission failed.');
                 }
 
+                if (submissionId !== formModalSubmissionIds[formType]) return;
+
                 form.reset();
                 showFormSuccess(formType);
-                setTimeout(() => closeModal(modalType), 3000);
+                formModalCloseTimers[formType] = setTimeout(() => {
+                    formModalCloseTimers[formType] = null;
+                    closeModal(modalType);
+                }, 3000);
             } catch (err) {
+                if (submissionId !== formModalSubmissionIds[formType]) return;
                 showFormError(formType, err.message || 'Something went wrong. Please try again or email info@carsandkids.net.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Submit';
