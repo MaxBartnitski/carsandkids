@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="forms-config.js"></script>
 </head>
 <body>
     <nav class="nav">
@@ -155,6 +156,11 @@
             </div>
             <div class="modal-body">
                 <form id="driveForm" class="custom-form">
+                    <div class="form-honeypot" aria-hidden="true">
+                        <label for="drive-website">Website</label>
+                        <input type="text" id="drive-website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+                    <div id="driveFormMessage" class="form-message hidden" role="alert"></div>
                     <div class="form-group">
                         <label for="drive-name">Full name</label>
                         <input type="text" id="drive-name" name="name" required>
@@ -210,6 +216,11 @@
             </div>
             <div class="modal-body">
                 <form id="visitForm" class="custom-form">
+                    <div class="form-honeypot" aria-hidden="true">
+                        <label for="visit-website">Website</label>
+                        <input type="text" id="visit-website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+                    <div id="visitFormMessage" class="form-message hidden" role="alert"></div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="visit-org">Organization name</label>
@@ -273,6 +284,11 @@
             </div>
             <div class="modal-body">
                 <form id="supportForm" class="custom-form">
+                    <div class="form-honeypot" aria-hidden="true">
+                        <label for="support-website">Website</label>
+                        <input type="text" id="support-website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+                    <div id="supportFormMessage" class="form-message hidden" role="alert"></div>
                     <div class="form-group">
                         <label for="support-name">Name</label>
                         <input type="text" id="support-name" name="name" required>
@@ -363,65 +379,118 @@
             }
         });
 
-        // Form submissions to Google Forms
+        function getFormsEndpoint() {
+            const url = window.CARSANDKIDS_FORMS_URL;
+            if (!url || typeof url !== 'string' || !url.startsWith('https://script.google.com/')) {
+                throw new Error('Form endpoint is not configured. See FORMS_SETUP.md.');
+            }
+            return url;
+        }
+
+        function showFormMessage(formType, type, text) {
+            const el = document.getElementById(formType + 'FormMessage');
+            el.textContent = text;
+            el.className = 'form-message ' + type;
+        }
+
+        function hideFormMessage(formType) {
+            const el = document.getElementById(formType + 'FormMessage');
+            el.textContent = '';
+            el.className = 'form-message hidden';
+        }
+
+        async function submitForm(formType, payload, form, modalType) {
+            const submitBtn = form.querySelector('.btn-submit');
+            hideFormMessage(formType);
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending…';
+
+            try {
+                const endpoint = getFormsEndpoint();
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload),
+                });
+
+                let result;
+                try {
+                    result = await response.json();
+                } catch (parseErr) {
+                    throw new Error('Unexpected response from form server.');
+                }
+
+                if (!result.ok) {
+                    throw new Error(result.error || 'Submission failed.');
+                }
+
+                form.reset();
+                showFormMessage(formType, 'success', 'Thank you! We received your message and will follow up soon.');
+                setTimeout(() => {
+                    closeModal(modalType);
+                    hideFormMessage(formType);
+                }, 2500);
+            } catch (err) {
+                showFormMessage(formType, 'error', err.message || 'Something went wrong. Please try again or email info@carsandkids.net.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            }
+        }
+
         document.getElementById('driveForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const form = e.target;
             const canDo = Array.from(form.querySelectorAll('input[name="canDo"]:checked')).map(cb => cb.value);
-            
-            const url = new URL('https://docs.google.com/forms/d/e/1FAIpQLSeqvNnD5h6_1Ak-nOhmW400GTZzQagWAqgWYrMPYwwfPPzoSw/formResponse');
-            url.searchParams.set('entry.1945822114', form.querySelector('#drive-name').value);
-            url.searchParams.set('entry.2010497485', form.querySelector('#drive-email').value);
-            url.searchParams.set('entry.169590424', form.querySelector('#drive-phone').value);
-            url.searchParams.set('entry.581039457', form.querySelector('#drive-car').value);
-            canDo.forEach(val => url.searchParams.append('entry.79750238', val));
-            url.searchParams.set('entry.960657169', form.querySelector('#drive-availability').value);
-            url.searchParams.set('entry.1365293258', form.querySelector('#drive-why').value);
-            
-            fetch(url, { method: 'POST', mode: 'no-cors' });
-            form.reset();
-            closeModal('drive');
-            alert('Thank you! We\'ll be in touch soon.');
+
+            submitForm('drive', {
+                formType: 'drive',
+                name: form.querySelector('#drive-name').value,
+                email: form.querySelector('#drive-email').value,
+                phone: form.querySelector('#drive-phone').value,
+                car: form.querySelector('#drive-car').value,
+                canDo,
+                availability: form.querySelector('#drive-availability').value,
+                why: form.querySelector('#drive-why').value,
+                website: form.querySelector('#drive-website').value,
+            }, form, 'drive');
         });
 
         document.getElementById('visitForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const form = e.target;
-            
-            const url = new URL('https://docs.google.com/forms/d/e/1FAIpQLSdTQD-Vf5sN-sY7c1f6nkTZuQO65caPEFepwRiSW5o_svbN-g/formResponse');
-            url.searchParams.set('entry.236242554', form.querySelector('#visit-org').value);
-            url.searchParams.set('entry.1051026975', form.querySelector('#visit-contact').value);
-            url.searchParams.set('entry.1909514253', form.querySelector('#visit-email').value);
-            url.searchParams.set('entry.1256584643', form.querySelector('#visit-phone').value);
-            url.searchParams.set('entry.64655232', form.querySelector('#visit-type').value);
-            url.searchParams.set('entry.403471719', form.querySelector('#visit-kids').value);
-            url.searchParams.set('entry.1276959081', form.querySelector('#visit-age').value);
-            url.searchParams.set('entry.194769397', form.querySelector('#visit-location').value);
-            url.searchParams.set('entry.746439507', form.querySelector('#visit-constraints').value);
-            url.searchParams.set('entry.352982221', form.querySelector('#visit-timing').value);
-            
-            fetch(url, { method: 'POST', mode: 'no-cors' });
-            form.reset();
-            closeModal('visit');
-            alert('Thank you! We\'ll be in touch soon.');
+
+            submitForm('visit', {
+                formType: 'visit',
+                org: form.querySelector('#visit-org').value,
+                contact: form.querySelector('#visit-contact').value,
+                email: form.querySelector('#visit-email').value,
+                phone: form.querySelector('#visit-phone').value,
+                type: form.querySelector('#visit-type').value,
+                kids: form.querySelector('#visit-kids').value,
+                age: form.querySelector('#visit-age').value,
+                location: form.querySelector('#visit-location').value,
+                constraints: form.querySelector('#visit-constraints').value,
+                timing: form.querySelector('#visit-timing').value,
+                website: form.querySelector('#visit-website').value,
+            }, form, 'visit');
         });
 
         document.getElementById('supportForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const form = e.target;
             const supportTypes = Array.from(form.querySelectorAll('input[name="supportType"]:checked')).map(cb => cb.value);
-            
-            const url = new URL('https://docs.google.com/forms/d/e/1FAIpQLSeDS4DtGdjeYgkThJCMBqloBDQcoRZeMG7y3Z-WPWHghwZn4w/formResponse');
-            url.searchParams.set('entry.235714150', form.querySelector('#support-name').value);
-            url.searchParams.set('entry.2054234273', form.querySelector('#support-email').value);
-            url.searchParams.set('entry.2049686966', form.querySelector('#support-org').value);
-            supportTypes.forEach(val => url.searchParams.append('entry.769997405', val));
-            url.searchParams.set('entry.1132339311', form.querySelector('#support-notes').value);
-            
-            fetch(url, { method: 'POST', mode: 'no-cors' });
-            form.reset();
-            closeModal('support');
-            alert('Thank you! We\'ll be in touch soon.');
+
+            submitForm('support', {
+                formType: 'support',
+                name: form.querySelector('#support-name').value,
+                email: form.querySelector('#support-email').value,
+                org: form.querySelector('#support-org').value,
+                supportType: supportTypes,
+                notes: form.querySelector('#support-notes').value,
+                website: form.querySelector('#support-website').value,
+            }, form, 'support');
         });
     </script>
 </body>
