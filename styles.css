@@ -577,6 +577,44 @@ main {
     background: #333;
 }
 
+.btn-submit:disabled {
+    background: #999;
+    cursor: not-allowed;
+}
+
+.form-honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.form-message {
+    padding: 14px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.form-message.success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.form-message.error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.form-message.hidden {
+    display: none;
+}
+
 /* Mobile */
 @media (max-width: 768px) {
     .nav {
