@@ -31,11 +31,11 @@ Website modals POST to a **Google Apps Script** web app bound to a **Cars & Kids
 
 Each submission gets `status = New`. Update status manually (Contacted, Scheduled, Closed, Declined) as you work leads.
 
-**All** tab columns (shared CRM view):
+**All** tab columns (full CRM view — unused fields stay blank):
 
-`submitted_at | form_type | status | name | email | phone | car | org | can_do | availability | why`
+`submitted_at | form_type | status | name | email | phone | car | org | can_do | availability | why | org_type | kids | age | location | constraints | timing | support_types | notes`
 
-Visit/Support-only fields live on the **Visit** and **Support** tabs, not on All. Unused All columns stay blank.
+Type-specific tabs (**Drive** / **Visit** / **Support**) still get a focused copy of each row.
 
 After changing headers: paste updated `Code.gs`, run **`setupIntakeSheet`**, then **Deploy → Manage deployments → New version**. Confirm with `?health=1` that `version` matches `CONFIG.VERSION` in Code.gs.
 
