@@ -31,13 +31,13 @@ Website modals POST to a **Google Apps Script** web app bound to a **Cars & Kids
 
 Each submission gets `status = New`. Update status manually (Contacted, Scheduled, Closed, Declined) as you work leads.
 
-**All** tab columns (one field per column — no packed `details` blob):
+**All** tab columns (shared CRM view):
 
-`submitted_at | form_type | status | name | email | phone | org | car | can_do | availability | why | org_type | kids | age | location | constraints | timing | support_types | notes`
+`submitted_at | form_type | status | name | email | phone | car | org | can_do | availability | why`
 
-Unused fields for a given form type stay blank. Type-specific tabs (**Drive** / **Visit** / **Support**) still get a focused copy of each row.
+Visit/Support-only fields live on the **Visit** and **Support** tabs, not on All. Unused All columns stay blank.
 
-If you already have an older All tab with a `details` column: paste the updated `Code.gs`, run **`setupIntakeSheet`** again (rewrites headers only), then **Deploy → New version**. Existing blob rows stay as-is; new rows split correctly.
+After changing headers: paste updated `Code.gs`, run **`setupIntakeSheet`**, then **Deploy → Manage deployments → New version**. Confirm with `?health=1` that `version` matches `CONFIG.VERSION` in Code.gs.
 
 ## 4. Deploy as web app
 

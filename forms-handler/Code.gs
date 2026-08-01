@@ -5,7 +5,7 @@
 
 var CONFIG = {
   // Bump this when changing doPost / sheet write logic — health check returns it
-  VERSION: '2026-08-01-split-columns',
+  VERSION: '2026-08-01-car-before-org',
   NOTIFY_EMAIL: 'info@carsandkids.net',
   FROM_EMAIL: 'info@carsandkids.net',
   FROM_NAME: 'Cars & Kids',
@@ -21,12 +21,10 @@ var TAB = {
 };
 
 var HEADERS = {};
-// All = one CRM view with every field in its own column (empty when N/A for that form type)
+// All = shared CRM columns only. Visit/Support extras live on their type tabs.
 HEADERS[TAB.ALL] = [
-  'submitted_at', 'form_type', 'status', 'name', 'email', 'phone', 'org',
-  'car', 'can_do', 'availability', 'why',
-  'org_type', 'kids', 'age', 'location', 'constraints', 'timing',
-  'support_types', 'notes',
+  'submitted_at', 'form_type', 'status', 'name', 'email', 'phone',
+  'car', 'org', 'can_do', 'availability', 'why',
 ];
 HEADERS[TAB.DRIVE] = [
   'submitted_at', 'status', 'name', 'email', 'phone', 'car', 'can_do', 'availability', 'why',
@@ -66,10 +64,15 @@ function setupIntakeSheet() {
       sheet = ss.insertSheet(tabName);
     }
     var headers = HEADERS[tabName];
-    // Always sync header row (does not clear existing data)
+    // Always sync header row (does not clear existing data rows)
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
     sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
     sheet.setFrozenRows(1);
+    // Drop leftover headers from a previous wider schema
+    var lastCol = sheet.getMaxColumns();
+    if (lastCol > headers.length) {
+      sheet.getRange(1, headers.length + 1, 1, lastCol).clearContent();
+    }
   });
 
   // Remove default Sheet1 if empty and not one of our tabs
@@ -213,11 +216,10 @@ function appendSubmission_(formType, data) {
       now, status, data.name, data.email, data.phone, data.car,
       data.canDo.join('; '), data.availability, data.why,
     ]);
+    // All: submitted_at, form_type, status, name, email, phone, car, org, can_do, availability, why
     appendRow_(ss, TAB.ALL, [
-      now, formType, status, data.name, data.email, data.phone, '',
-      data.car, data.canDo.join('; '), data.availability, data.why,
-      '', '', '', '', '', '',
-      '', '',
+      now, formType, status, data.name, data.email, data.phone,
+      data.car, '', data.canDo.join('; '), data.availability, data.why,
     ]);
     return;
   }
@@ -228,10 +230,8 @@ function appendSubmission_(formType, data) {
       data.kids, data.age, data.location, data.constraints, data.timing,
     ]);
     appendRow_(ss, TAB.ALL, [
-      now, formType, status, data.contact, data.email, data.phone, data.org,
-      '', '', '', '',
-      data.type, data.kids, data.age, data.location, data.constraints, data.timing,
-      '', '',
+      now, formType, status, data.contact, data.email, data.phone,
+      '', data.org, '', '', '',
     ]);
     return;
   }
@@ -240,10 +240,8 @@ function appendSubmission_(formType, data) {
     now, status, data.name, data.email, data.org, data.supportTypes.join('; '), data.notes,
   ]);
   appendRow_(ss, TAB.ALL, [
-    now, formType, status, data.name, data.email, '', data.org,
-    '', '', '', '',
-    '', '', '', '', '', '',
-    data.supportTypes.join('; '), data.notes,
+    now, formType, status, data.name, data.email, '',
+    '', data.org, '', '', '',
   ]);
 }
 
