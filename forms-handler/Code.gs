@@ -19,8 +19,12 @@ var TAB = {
 };
 
 var HEADERS = {};
+// All = one CRM view with every field in its own column (empty when N/A for that form type)
 HEADERS[TAB.ALL] = [
-  'submitted_at', 'form_type', 'status', 'name', 'email', 'phone', 'org', 'details',
+  'submitted_at', 'form_type', 'status', 'name', 'email', 'phone', 'org',
+  'car', 'can_do', 'availability', 'why',
+  'org_type', 'kids', 'age', 'location', 'constraints', 'timing',
+  'support_types', 'notes',
 ];
 HEADERS[TAB.DRIVE] = [
   'submitted_at', 'status', 'name', 'email', 'phone', 'car', 'can_do', 'availability', 'why',
@@ -60,14 +64,10 @@ function setupIntakeSheet() {
       sheet = ss.insertSheet(tabName);
     }
     var headers = HEADERS[tabName];
-    var existing = sheet.getLastRow() >= 1 ? sheet.getRange(1, 1, 1, headers.length).getValues()[0] : [];
-    var needsHeaders = existing.join('') === '' || existing[0] !== headers[0];
-    if (needsHeaders) {
-      sheet.clear();
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-      sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
-      sheet.setFrozenRows(1);
-    }
+    // Always sync header row (does not clear existing data)
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+    sheet.setFrozenRows(1);
   });
 
   // Remove default Sheet1 if empty and not one of our tabs
@@ -209,12 +209,9 @@ function appendSubmission_(formType, data) {
     ]);
     appendRow_(ss, TAB.ALL, [
       now, formType, status, data.name, data.email, data.phone, '',
-      buildDetails_({
-        car: data.car,
-        can_do: data.canDo.join('; '),
-        availability: data.availability,
-        why: data.why,
-      }),
+      data.car, data.canDo.join('; '), data.availability, data.why,
+      '', '', '', '', '', '',
+      '', '',
     ]);
     return;
   }
@@ -226,14 +223,9 @@ function appendSubmission_(formType, data) {
     ]);
     appendRow_(ss, TAB.ALL, [
       now, formType, status, data.contact, data.email, data.phone, data.org,
-      buildDetails_({
-        type: data.type,
-        kids: data.kids,
-        age: data.age,
-        location: data.location,
-        constraints: data.constraints,
-        timing: data.timing,
-      }),
+      '', '', '', '',
+      data.type, data.kids, data.age, data.location, data.constraints, data.timing,
+      '', '',
     ]);
     return;
   }
@@ -243,10 +235,9 @@ function appendSubmission_(formType, data) {
   ]);
   appendRow_(ss, TAB.ALL, [
     now, formType, status, data.name, data.email, '', data.org,
-    buildDetails_({
-      support_types: data.supportTypes.join('; '),
-      notes: data.notes,
-    }),
+    '', '', '', '',
+    '', '', '', '', '', '',
+    data.supportTypes.join('; '), data.notes,
   ]);
 }
 
@@ -255,14 +246,13 @@ function appendRow_(ss, tabName, row) {
   if (!sheet) {
     throw new Error('Missing tab "' + tabName + '" — run setupIntakeSheet() first.');
   }
+  if (row.length !== HEADERS[tabName].length) {
+    throw new Error(
+      'Column count mismatch for "' + tabName + '": got ' + row.length +
+      ', expected ' + HEADERS[tabName].length + '. Run setupIntakeSheet().'
+    );
+  }
   sheet.appendRow(row);
-}
-
-function buildDetails_(fields) {
-  return Object.keys(fields)
-    .filter(function (k) { return fields[k]; })
-    .map(function (k) { return k + ': ' + fields[k]; })
-    .join(' | ');
 }
 
 function sendNotificationEmail_(formType, data) {
