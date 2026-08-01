@@ -4,6 +4,8 @@
  */
 
 var CONFIG = {
+  // Bump this when changing doPost / sheet write logic — health check returns it
+  VERSION: '2026-08-01-split-columns',
   NOTIFY_EMAIL: 'info@carsandkids.net',
   FROM_EMAIL: 'info@carsandkids.net',
   FROM_NAME: 'Cars & Kids',
@@ -87,9 +89,13 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  // Health check — GET /exec returns status (useful after deploy)
+  // Health check — GET /exec?health=1 returns status + version (proves which deploy is live)
   if (e && e.parameter && e.parameter.health === '1') {
-    return jsonResponse_({ ok: true, service: 'carsandkids-forms' });
+    return jsonResponse_({
+      ok: true,
+      service: 'carsandkids-forms',
+      version: CONFIG.VERSION,
+    });
   }
   return jsonResponse_({ ok: false, error: 'Use POST to submit forms.' });
 }
