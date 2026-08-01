@@ -5,7 +5,7 @@
 
 var CONFIG = {
   // Bump this when changing doPost / sheet write logic — health check returns it
-  VERSION: '2026-08-01-car-before-org',
+  VERSION: '2026-08-01-all-fields-car-first',
   NOTIFY_EMAIL: 'info@carsandkids.net',
   FROM_EMAIL: 'info@carsandkids.net',
   FROM_NAME: 'Cars & Kids',
@@ -21,10 +21,12 @@ var TAB = {
 };
 
 var HEADERS = {};
-// All = shared CRM columns only. Visit/Support extras live on their type tabs.
+// All = full CRM view; car before org. Unused fields stay blank per form type.
 HEADERS[TAB.ALL] = [
   'submitted_at', 'form_type', 'status', 'name', 'email', 'phone',
   'car', 'org', 'can_do', 'availability', 'why',
+  'org_type', 'kids', 'age', 'location', 'constraints', 'timing',
+  'support_types', 'notes',
 ];
 HEADERS[TAB.DRIVE] = [
   'submitted_at', 'status', 'name', 'email', 'phone', 'car', 'can_do', 'availability', 'why',
@@ -216,10 +218,11 @@ function appendSubmission_(formType, data) {
       now, status, data.name, data.email, data.phone, data.car,
       data.canDo.join('; '), data.availability, data.why,
     ]);
-    // All: submitted_at, form_type, status, name, email, phone, car, org, can_do, availability, why
     appendRow_(ss, TAB.ALL, [
       now, formType, status, data.name, data.email, data.phone,
       data.car, '', data.canDo.join('; '), data.availability, data.why,
+      '', '', '', '', '', '',
+      '', '',
     ]);
     return;
   }
@@ -232,6 +235,8 @@ function appendSubmission_(formType, data) {
     appendRow_(ss, TAB.ALL, [
       now, formType, status, data.contact, data.email, data.phone,
       '', data.org, '', '', '',
+      data.type, data.kids, data.age, data.location, data.constraints, data.timing,
+      '', '',
     ]);
     return;
   }
@@ -242,6 +247,8 @@ function appendSubmission_(formType, data) {
   appendRow_(ss, TAB.ALL, [
     now, formType, status, data.name, data.email, '',
     '', data.org, '', '', '',
+    '', '', '', '', '', '',
+    data.supportTypes.join('; '), data.notes,
   ]);
 }
 
