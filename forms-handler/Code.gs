@@ -1,16 +1,27 @@
 /**
  * Cars & Kids website form handler
  * Bound to "Cars & Kids Intake" spreadsheet — run setupIntakeSheet() once after paste.
+ *
+ * Drive + Support also: upsert Google Contact (Volunteer label), invite to upcoming
+ * [Cars & Kids] calendar events, send welcome (To max@, BCC volunteer).
  */
 
 var CONFIG = {
-  // Bump this when changing doPost / sheet write logic — health check returns it
-  VERSION: '2026-08-01-all-fields-car-first',
+  // Bump this when changing doPost / sheet write / CRM logic — health check returns it
+  VERSION: '2026-09-01-volunteer-crm',
   NOTIFY_EMAIL: 'info@carsandkids.net',
   FROM_EMAIL: 'info@carsandkids.net',
   FROM_NAME: 'Cars & Kids',
   SITE_URL: 'https://carsandkids.net/',
   STATUS_NEW: 'New',
+  WELCOME_TO: 'max@carsandkids.net',
+  WELCOME_FROM: 'max@carsandkids.net',
+  WELCOME_FROM_NAME: 'Max Bartnitski',
+  VOLUNTEER_LABEL: 'Volunteer',
+  EVENT_TITLE_TAG: '[Cars & Kids]',
+  CALENDAR_LOOKAHEAD_MONTHS: 18,
+  // Editor tests skip live calendar invites unless you set this true on purpose.
+  TEST_SEND_CALENDAR: false,
 };
 
 var TAB = {
@@ -127,7 +138,19 @@ function handleSubmission_(e) {
     validateSubmission_(formType, normalized);
 
     appendSubmission_(formType, normalized);
-    sendNotificationEmail_(formType, normalized);
+
+    var crm = emptyCrmResult_();
+    if (formType === 'drive' || formType === 'support') {
+      crm = runVolunteerCrm_(formType, normalized, {
+        skipCalendar: data._test === true && !CONFIG.TEST_SEND_CALENDAR,
+      });
+    }
+
+    try {
+      sendNotificationEmail_(formType, normalized, crm);
+    } catch (notifyErr) {
+      Logger.log('NOTIFICATION FAILED after sheet write: ' + notifyErr.message);
+    }
 
     return jsonResponse_({ ok: true });
   } catch (err) {
@@ -266,10 +289,460 @@ function appendRow_(ss, tabName, row) {
   sheet.appendRow(row);
 }
 
-function sendNotificationEmail_(formType, data) {
-  var subject = buildNotifySubject_(formType, data);
-  var plain = buildNotifyPlain_(formType, data);
-  var html = buildNotifyHtml_(formType, data);
+function emptyCrmResult_() {
+  return {
+    errors: [],
+    warnings: [],
+    alreadyVolunteer: false,
+    contactOk: false,
+    eventsAdded: [],
+    eventsSkipped: [],
+    eventsNoneFound: false,
+    welcomeSent: false,
+    welcomeSkipped: false,
+  };
+}
+
+function runVolunteerCrm_(formType, data, options) {
+  options = options || {};
+  var result = emptyCrmResult_();
+  var alreadyVolunteer = false;
+
+  try {
+    var contactInfo = upsertVolunteerContact_(formType, data);
+    alreadyVolunteer = !!contactInfo.alreadyVolunteer;
+    result.alreadyVolunteer = alreadyVolunteer;
+    result.contactOk = true;
+  } catch (err) {
+    result.errors.push('Google Contact: ' + (err.message || err));
+  }
+
+  try {
+    if (options.skipCalendar) {
+      result.warnings.push(
+        'Calendar invites skipped (editor test). Set CONFIG.TEST_SEND_CALENDAR = true to send.'
+      );
+    } else {
+      var cal = inviteToUpcomingEvents_(data.email);
+      result.eventsAdded = cal.added;
+      result.eventsSkipped = cal.skipped;
+      result.eventsNoneFound = cal.noneFound;
+      if (cal.noneFound) {
+        result.warnings.push('NO UPCOMING [Cars & Kids] EVENTS');
+      }
+      if (cal.failures && cal.failures.length) {
+        result.errors.push('Calendar: ' + cal.failures.join('; '));
+      }
+    }
+  } catch (err) {
+    result.errors.push('Calendar: ' + (err.message || err));
+  }
+
+  try {
+    if (alreadyVolunteer) {
+      result.welcomeSkipped = true;
+    } else {
+      sendWelcomeEmail_(formType, data, result.eventsAdded.length > 0);
+      result.welcomeSent = true;
+    }
+  } catch (err) {
+    result.errors.push('Welcome email: ' + (err.message || err));
+  }
+
+  return result;
+}
+
+function assertPeopleApi_() {
+  if (typeof People === 'undefined') {
+    throw new Error(
+      'People API advanced service is not enabled. In Apps Script: Services (+) → People API.'
+    );
+  }
+}
+
+function assertCalendarApi_() {
+  if (typeof Calendar === 'undefined') {
+    throw new Error(
+      'Calendar API advanced service is not enabled. In Apps Script: Services (+) → Google Calendar API.'
+    );
+  }
+}
+
+function splitName_(full) {
+  var parts = String(full || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) {
+    return { givenName: 'Volunteer', familyName: '' };
+  }
+  if (parts.length === 1) {
+    return { givenName: parts[0], familyName: '' };
+  }
+  return { givenName: parts[0], familyName: parts.slice(1).join(' ') };
+}
+
+function firstName_(full) {
+  return splitName_(full).givenName;
+}
+
+function personHasEmail_(person, email) {
+  var addresses = (person && person.emailAddresses) || [];
+  return addresses.some(function (item) {
+    return item.value && item.value.toLowerCase() === email;
+  });
+}
+
+function findContactByEmail_(email) {
+  assertPeopleApi_();
+  var needle = email.toLowerCase();
+  var fields = 'names,emailAddresses,phoneNumbers,biographies,memberships,metadata';
+
+  var searched = People.People.searchContacts({
+    query: email,
+    readMask: fields,
+    pageSize: 25,
+  });
+  var searchHits = (searched && searched.results) || [];
+  var i;
+  for (i = 0; i < searchHits.length; i++) {
+    if (searchHits[i].person && personHasEmail_(searchHits[i].person, needle)) {
+      return searchHits[i].person;
+    }
+  }
+
+  var pageToken;
+  do {
+    var conn = People.People.Connections.list('people/me', {
+      personFields: fields,
+      pageSize: 200,
+      pageToken: pageToken,
+    });
+    var people = (conn && conn.connections) || [];
+    for (i = 0; i < people.length; i++) {
+      if (personHasEmail_(people[i], needle)) {
+        return people[i];
+      }
+    }
+    pageToken = conn && conn.nextPageToken;
+  } while (pageToken);
+
+  return null;
+}
+
+function listContactGroups_() {
+  assertPeopleApi_();
+  var groups = [];
+  var pageToken;
+  do {
+    var res = People.ContactGroups.list({
+      groupFields: 'name,groupType,memberCount',
+      pageToken: pageToken,
+    });
+    var items = (res && res.contactGroups) || [];
+    for (var i = 0; i < items.length; i++) {
+      groups.push(items[i]);
+    }
+    pageToken = res && res.nextPageToken;
+  } while (pageToken);
+  return groups;
+}
+
+function ensureVolunteerGroup_() {
+  var wanted = CONFIG.VOLUNTEER_LABEL.toLowerCase();
+  var groups = listContactGroups_();
+  for (var i = 0; i < groups.length; i++) {
+    var name = (groups[i].name || '').toLowerCase();
+    if (name === wanted) {
+      return groups[i];
+    }
+  }
+  var created = People.ContactGroups.create({
+    contactGroup: { name: CONFIG.VOLUNTEER_LABEL },
+  });
+  if (!created || !created.resourceName) {
+    throw new Error('People API created no Volunteer contact group.');
+  }
+  return created;
+}
+
+function personInGroup_(person, groupResourceName) {
+  var memberships = (person && person.memberships) || [];
+  return memberships.some(function (m) {
+    var cg = m.contactGroupMembership;
+    return cg && cg.contactGroupResourceName === groupResourceName;
+  });
+}
+
+function contactNotes_(formType, data) {
+  var lines = ['Cars & Kids ' + FORM_LABELS[formType]];
+  if (formType === 'drive') {
+    lines.push('Car: ' + data.car);
+    lines.push('Can do: ' + (data.canDo.length ? data.canDo.join(', ') : '(none)'));
+    lines.push('Availability: ' + (data.availability || '(none)'));
+    lines.push('Why: ' + (data.why || '(none)'));
+  } else {
+    lines.push('Organization: ' + (data.org || '(none)'));
+    lines.push('Support types: ' + (data.supportTypes.length ? data.supportTypes.join(', ') : '(none)'));
+    lines.push('Notes: ' + (data.notes || '(none)'));
+  }
+  return lines.join('\n');
+}
+
+function upsertVolunteerContact_(formType, data) {
+  assertPeopleApi_();
+  var group = ensureVolunteerGroup_();
+  var groupResourceName = group.resourceName;
+  var existing = findContactByEmail_(data.email);
+  var alreadyVolunteer = existing ? personInGroup_(existing, groupResourceName) : false;
+  var notes = contactNotes_(formType, data);
+
+  if (!existing) {
+    var names = splitName_(data.name);
+    var createdBody = {
+      names: [{ givenName: names.givenName, familyName: names.familyName }],
+      emailAddresses: [{ value: data.email }],
+      biographies: [{ value: notes, contentType: 'TEXT_PLAIN' }],
+    };
+    if (data.phone) {
+      createdBody.phoneNumbers = [{ value: data.phone }];
+    }
+    existing = People.People.createContact(createdBody);
+    if (!existing || !existing.resourceName) {
+      throw new Error('People API created a contact but returned no resourceName.');
+    }
+  } else {
+    if (!existing.etag) {
+      throw new Error('Existing contact is missing etag; cannot update ' + data.email + '.');
+    }
+    var updateBody = { etag: existing.etag };
+    var changedFields = ['biographies'];
+    updateBody.biographies = [{ value: notes, contentType: 'TEXT_PLAIN' }];
+    if (data.phone) {
+      var phones = existing.phoneNumbers ? existing.phoneNumbers.slice() : [];
+      var hasPhone = phones.some(function (p) {
+        return p.value && p.value.replace(/\D/g, '') === data.phone.replace(/\D/g, '');
+      });
+      if (!hasPhone) {
+        phones.push({ value: data.phone });
+        updateBody.phoneNumbers = phones;
+        changedFields.push('phoneNumbers');
+      }
+    }
+    People.People.updateContact(updateBody, existing.resourceName, {
+      updatePersonFields: changedFields.join(','),
+    });
+  }
+
+  if (!personInGroup_(existing, groupResourceName)) {
+    People.ContactGroups.Members.modify({
+      resourceNamesToAdd: [existing.resourceName],
+    }, groupResourceName);
+  }
+
+  return {
+    resourceName: existing.resourceName,
+    alreadyVolunteer: alreadyVolunteer,
+  };
+}
+
+function inviteToUpcomingEvents_(email) {
+  assertCalendarApi_();
+  var needle = email.toLowerCase();
+  var tag = CONFIG.EVENT_TITLE_TAG;
+  var start = new Date();
+  start.setHours(0, 0, 0, 0);
+  var end = new Date(start);
+  end.setMonth(end.getMonth() + CONFIG.CALENDAR_LOOKAHEAD_MONTHS);
+
+  var calendars = listWritableCalendars_();
+  if (!calendars.length) {
+    throw new Error(
+      'No writable calendars on this account. Deploy the web app as max@makobabusiness.com.'
+    );
+  }
+
+  var matches = [];
+  var c;
+  for (c = 0; c < calendars.length; c++) {
+    var pageToken;
+    do {
+      var res = Calendar.Events.list(calendars[c].id, {
+        timeMin: start.toISOString(),
+        timeMax: end.toISOString(),
+        singleEvents: true,
+        orderBy: 'startTime',
+        q: tag,
+        pageToken: pageToken,
+      });
+      var items = (res && res.items) || [];
+      var i;
+      for (i = 0; i < items.length; i++) {
+        var ev = items[i];
+        var title = ev.summary || '';
+        if (title.indexOf(tag) === -1) continue;
+        matches.push({
+          calendarId: calendars[c].id,
+          event: ev,
+          title: title,
+        });
+      }
+      pageToken = res && res.nextPageToken;
+    } while (pageToken);
+  }
+
+  var added = [];
+  var skipped = [];
+  var failures = [];
+
+  if (!matches.length) {
+    return { added: added, skipped: skipped, failures: failures, noneFound: true };
+  }
+
+  for (c = 0; c < matches.length; c++) {
+    var match = matches[c];
+    var attendees = match.event.attendees ? match.event.attendees.slice() : [];
+    var already = attendees.some(function (a) {
+      return a.email && a.email.toLowerCase() === needle;
+    });
+    if (already) {
+      skipped.push(match.title);
+      continue;
+    }
+    attendees.push({ email: email });
+    try {
+      var patched = Calendar.Events.patch(
+        { attendees: attendees },
+        match.calendarId,
+        match.event.id,
+        { sendUpdates: 'all' }
+      );
+      if (!patched || !patched.id) {
+        throw new Error('Calendar patch returned no event id.');
+      }
+      added.push(match.title);
+    } catch (err) {
+      failures.push(match.title + ': ' + (err.message || err));
+    }
+  }
+
+  return { added: added, skipped: skipped, failures: failures, noneFound: false };
+}
+
+function listWritableCalendars_() {
+  assertCalendarApi_();
+  var calendars = [];
+  var pageToken;
+  do {
+    var res = Calendar.CalendarList.list({
+      minAccessRole: 'writer',
+      pageToken: pageToken,
+    });
+    var items = (res && res.items) || [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].id) {
+        calendars.push({ id: items[i].id, summary: items[i].summary });
+      }
+    }
+    pageToken = res && res.nextPageToken;
+  } while (pageToken);
+  return calendars;
+}
+
+function assertWelcomeSendAs_() {
+  var wanted = CONFIG.WELCOME_FROM.toLowerCase();
+  var aliases = GmailApp.getAliases() || [];
+  var match = aliases.some(function (alias) {
+    return String(alias).toLowerCase() === wanted;
+  });
+  if (match) return;
+  var me = Session.getActiveUser().getEmail();
+  if (me && me.toLowerCase() === wanted) return;
+  throw new Error(
+    'Gmail is not configured to send as ' + CONFIG.WELCOME_FROM +
+    '. Available aliases: ' + (aliases.join(', ') || '(none)') +
+    '. Add it in Gmail → Settings → Accounts → Send mail as.'
+  );
+}
+
+function sendWelcomeEmail_(formType, data, invitesSent) {
+  assertWelcomeSendAs_();
+  var built = buildWelcome_(formType, data, invitesSent);
+  GmailApp.sendEmail(CONFIG.WELCOME_TO, built.subject, built.plain, {
+    htmlBody: built.html,
+    name: CONFIG.WELCOME_FROM_NAME,
+    from: CONFIG.WELCOME_FROM,
+    replyTo: CONFIG.WELCOME_FROM,
+    bcc: data.email,
+  });
+}
+
+function buildWelcome_(formType, data, invitesSent) {
+  var first = firstName_(data.name);
+  var lines = ['Hi ' + first + ',', '', 'Thanks for signing up with Cars & Kids. Glad you are in.'];
+
+  if (formType === 'drive' && data.car) {
+    lines[2] += ' Excited to have the ' + data.car + ' in the mix.';
+  }
+
+  lines.push('');
+  if (invitesSent) {
+    lines.push(
+      'I sent calendar invites for the upcoming events. Please RSVP yes or no on those so I can communicate with the facilities effectively.'
+    );
+  } else {
+    lines.push(
+      'I will send calendar invites for upcoming events. Please RSVP yes or no on those so I can communicate with the facilities effectively.'
+    );
+  }
+
+  if (formType === 'drive') {
+    lines.push('');
+    lines.push('Reply with a good photo of your car. We use those to promote the event.');
+  }
+
+  lines.push('');
+  lines.push('If anything looks off, just reply here.');
+  lines.push('');
+  lines.push('Max');
+  lines.push('Cars & Kids');
+  lines.push(CONFIG.SITE_URL.replace(/\/$/, ''));
+
+  var plain = lines.join('\n');
+  var htmlParts = [];
+  var para = [];
+  var i;
+  for (i = 0; i < lines.length; i++) {
+    if (lines[i] === '') {
+      if (para.length) {
+        htmlParts.push('<p style="margin:0 0 1em 0;">' + para.join('<br>\n') + '</p>');
+        para = [];
+      }
+    } else {
+      para.push(escapeHtml_(lines[i]));
+    }
+  }
+  if (para.length) {
+    htmlParts.push('<p style="margin:0 0 1em 0;">' + para.join('<br>\n') + '</p>');
+  }
+  var html = (
+    '<div style="font-family:sans-serif;font-size:14px;line-height:1.5;color:#222;">' +
+    htmlParts.join('\n').replace(
+      escapeHtml_(CONFIG.SITE_URL.replace(/\/$/, '')),
+      '<a href="' + CONFIG.SITE_URL + '">' + escapeHtml_(CONFIG.SITE_URL.replace(/\/$/, '')) + '</a>'
+    ) +
+    '</div>'
+  );
+
+  return {
+    subject: 'Welcome to Cars & Kids',
+    plain: plain,
+    html: html,
+  };
+}
+
+function sendNotificationEmail_(formType, data, crm) {
+  crm = crm || emptyCrmResult_();
+  var subject = buildNotifySubject_(formType, data, crm);
+  var plain = buildNotifyPlain_(formType, data, crm);
+  var html = buildNotifyHtml_(formType, data, crm);
   var replyTo = data.email;
 
   GmailApp.sendEmail(CONFIG.NOTIFY_EMAIL, subject, plain, {
@@ -279,19 +752,64 @@ function sendNotificationEmail_(formType, data) {
   });
 }
 
-function buildNotifySubject_(formType, data) {
+function buildNotifySubject_(formType, data, crm) {
   var prefix = NOTIFY_PREFIX[formType];
+  var core;
   if (formType === 'drive') {
-    return '[Cars & Kids] ' + prefix + ' — ' + data.name + ' (' + data.car + ')';
+    core = prefix + ' — ' + data.name + ' (' + data.car + ')';
+  } else if (formType === 'visit') {
+    core = prefix + ' — ' + data.org + ' (' + data.contact + ')';
+  } else {
+    var orgPart = data.org ? ' (' + data.org + ')' : '';
+    core = prefix + ' — ' + data.name + orgPart;
   }
-  if (formType === 'visit') {
-    return '[Cars & Kids] ' + prefix + ' — ' + data.org + ' (' + data.contact + ')';
+  if (crm.errors && crm.errors.length) {
+    return '[Cars & Kids] CONTACT/CALENDAR/WELCOME FAILED — ' + core;
   }
-  var orgPart = data.org ? ' (' + data.org + ')' : '';
-  return '[Cars & Kids] ' + prefix + ' — ' + data.name + orgPart;
+  if (crm.warnings && crm.warnings.length) {
+    return '[Cars & Kids] ' + crm.warnings[0] + ' — ' + core;
+  }
+  return '[Cars & Kids] ' + core;
 }
 
-function buildNotifyPlain_(formType, data) {
+function buildCrmPlain_(crm) {
+  if (!crm) return [];
+  var lines = ['', '--- Volunteer CRM ---'];
+  if (crm.errors.length) {
+    lines.push('FAILED:');
+    crm.errors.forEach(function (msg) {
+      lines.push('  - ' + msg);
+    });
+  }
+  if (crm.warnings.length) {
+    crm.warnings.forEach(function (msg) {
+      lines.push('WARNING: ' + msg);
+    });
+  }
+  if (crm.contactOk) {
+    lines.push(crm.alreadyVolunteer ? 'Contact: existing Volunteer (updated).' : 'Contact: created/updated + Volunteer label.');
+  }
+  if (crm.eventsAdded.length) {
+    lines.push('Calendar invites sent:');
+    crm.eventsAdded.forEach(function (title) {
+      lines.push('  - ' + title);
+    });
+  }
+  if (crm.eventsSkipped.length) {
+    lines.push('Already a guest (not re-sent):');
+    crm.eventsSkipped.forEach(function (title) {
+      lines.push('  - ' + title);
+    });
+  }
+  if (crm.welcomeSent) {
+    lines.push('Welcome email: sent to ' + CONFIG.WELCOME_TO + ' (BCC volunteer).');
+  } else if (crm.welcomeSkipped) {
+    lines.push('Welcome email: skipped (already a Volunteer).');
+  }
+  return lines;
+}
+
+function buildNotifyPlain_(formType, data, crm) {
   var lines = ['New ' + FORM_LABELS[formType] + ' from carsandkids.net', ''];
 
   if (formType === 'drive') {
@@ -321,12 +839,56 @@ function buildNotifyPlain_(formType, data) {
     lines.push('Notes: ' + (data.notes || '(none)'));
   }
 
+  if (formType !== 'visit') {
+    lines = lines.concat(buildCrmPlain_(crm));
+  }
+
   lines.push('');
   lines.push('Reply to this email to reach the submitter.');
   return lines.join('\n');
 }
 
-function buildNotifyHtml_(formType, data) {
+function buildCrmHtml_(crm) {
+  var chunks = [];
+  if (crm.errors.length) {
+    chunks.push(
+      '<p style="color:#b00020;font-weight:700;margin:16px 0 8px 0;">CONTACT/CALENDAR/WELCOME FAILED</p><ul>' +
+      crm.errors.map(function (msg) {
+        return '<li>' + escapeHtml_(msg) + '</li>';
+      }).join('') +
+      '</ul>'
+    );
+  }
+  if (crm.warnings.length) {
+    chunks.push(
+      '<p style="color:#8a5a00;font-weight:700;">' +
+      crm.warnings.map(function (msg) { return escapeHtml_(msg); }).join('<br>') +
+      '</p>'
+    );
+  }
+  var rows = [];
+  if (crm.contactOk) {
+    rows.push(crm.alreadyVolunteer ? 'Existing Volunteer (updated)' : 'Created/updated + Volunteer label');
+  }
+  if (crm.eventsAdded.length) {
+    rows.push('Invites sent: ' + crm.eventsAdded.join('; '));
+  }
+  if (crm.eventsSkipped.length) {
+    rows.push('Already a guest: ' + crm.eventsSkipped.join('; '));
+  }
+  if (crm.welcomeSent) {
+    rows.push('Welcome sent to ' + CONFIG.WELCOME_TO + ' (BCC volunteer)');
+  } else if (crm.welcomeSkipped) {
+    rows.push('Welcome skipped (already a Volunteer)');
+  }
+  if (rows.length) {
+    chunks.push('<p>' + rows.map(function (r) { return escapeHtml_(r); }).join('<br>') + '</p>');
+  }
+  return chunks.join('');
+}
+
+function buildNotifyHtml_(formType, data, crm) {
+  crm = crm || emptyCrmResult_();
   var rows = [];
   var add = function (label, value) {
     rows.push('<tr><td style="padding:4px 12px 4px 0;font-weight:600;vertical-align:top;">' +
@@ -361,9 +923,12 @@ function buildNotifyHtml_(formType, data) {
     add('Notes', data.notes);
   }
 
+  var crmHtml = formType === 'visit' ? '' : buildCrmHtml_(crm);
+
   return (
     '<p>New <strong>' + escapeHtml_(FORM_LABELS[formType]) + '</strong> from ' +
     '<a href="' + CONFIG.SITE_URL + '">carsandkids.net</a></p>' +
+    crmHtml +
     '<table style="border-collapse:collapse;">' + rows.join('') + '</table>' +
     '<p style="color:#666;margin-top:16px;">Reply to this email to reach the submitter.</p>'
   );
@@ -386,6 +951,7 @@ function jsonResponse_(obj) {
 /**
  * Run from Apps Script editor after setupIntakeSheet() to verify Sheet + email.
  * Change TEST_EMAIL to your inbox before running.
+ * Calendar invites are skipped unless CONFIG.TEST_SEND_CALENDAR is true.
  */
 var TEST_EMAIL = 'max@carsandkids.net';
 
@@ -400,6 +966,7 @@ function testDriveSubmission() {
     availability: 'Weekends',
     why: 'Apps Script test submission',
     website: '',
+    _test: true,
   });
 }
 
@@ -429,6 +996,7 @@ function testSupportSubmission() {
     supportType: ['Sponsorship'],
     notes: 'Apps Script test submission',
     website: '',
+    _test: true,
   });
 }
 
