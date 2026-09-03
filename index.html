@@ -307,6 +307,10 @@
                         <input type="email" id="support-email" name="email" required>
                     </div>
                     <div class="form-group">
+                        <label for="support-phone">Phone</label>
+                        <input type="tel" id="support-phone" name="phone">
+                    </div>
+                    <div class="form-group">
                         <label for="support-org">Organization / Company</label>
                         <input type="text" id="support-org" name="org">
                     </div>
@@ -515,6 +519,7 @@
                 formType: 'support',
                 name: form.querySelector('#support-name').value,
                 email: form.querySelector('#support-email').value,
+                phone: form.querySelector('#support-phone').value,
                 org: form.querySelector('#support-org').value,
                 supportType: supportTypes,
                 notes: form.querySelector('#support-notes').value,

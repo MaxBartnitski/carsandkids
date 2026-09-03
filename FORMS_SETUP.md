@@ -4,7 +4,7 @@ Website modals POST to a **Google Apps Script** web app bound to a **Cars & Kids
 
 1. Appends a row to the Sheet (source of truth)
 2. Emails `info@carsandkids.net` (notification; reply goes to the submitter)
-3. **Drive and Support only:** creates or updates a Google Contact with the **Volunteer** label, adds the person as a guest on upcoming calendar events titled with `[Cars & Kids]` (and sends those invites), and sends a welcome email **To** `max@carsandkids.net` **BCC** the volunteer
+3. **Drive and Support only:** creates or updates a Google Contact with the **Volunteers** label, adds the person as a guest on upcoming calendar events titled with `[Cars & Kids]` (and sends those invites), and sends a welcome email **To** `max@carsandkids.net` **BCC** the volunteer
 
 Visit requests stay Sheet + notify only. The website still shows confirmation (no auto-reply from the form itself).
 
@@ -41,7 +41,7 @@ Each submission gets `status = New`. Update status manually (Contacted, Schedule
 
 `submitted_at | form_type | status | name | email | phone | car | org | can_do | availability | why | org_type | kids | age | location | constraints | timing | support_types | notes`
 
-Type-specific tabs (**Drive** / **Visit** / **Support**) still get a focused copy of each row.
+Type-specific tabs (**Drive** / **Visit** / **Support**) still get a focused copy of each row. Support columns: `submitted_at | status | name | email | phone | org | support_types | notes`.
 
 After changing headers: paste updated `Code.gs`, run **`setupIntakeSheet`**, then **Deploy → Manage deployments → New version**. Confirm with `?health=1` that `version` matches `CONFIG.VERSION` in Code.gs.
 
@@ -93,7 +93,7 @@ Guest list stays however you set it on the event. The script does not change vis
 2. Keep `CONFIG.TEST_SEND_CALENDAR = false` so editor tests **do not** add the test address to live events
 3. Run **`testDriveSubmission`**, **`testVisitSubmission`**, **`testSupportSubmission`**
 4. Check logs for `{"ok":true}`
-5. Drive/Support tests create or update a **Volunteer** contact and send a welcome **To** `max@carsandkids.net` (BCC `TEST_EMAIL`). Delete the test contact if you do not want it.
+5. Drive/Support tests create or update a **Volunteers** contact and send a welcome **To** `max@carsandkids.net` (BCC `TEST_EMAIL`). Delete the test contact if you do not want it.
 
 To actually send calendar invites from an editor test, set `CONFIG.TEST_SEND_CALENDAR = true`, run once, then set it back to `false` before deploying.
 
@@ -105,7 +105,7 @@ For each form (Drive, Visit, Support):
 - [ ] Notification arrives at **info@carsandkids.net**
 - [ ] Website shows the thank-you panel
 - [ ] Reply on the notification goes to the submitter
-- [ ] Drive/Support: Google Contact exists with **Volunteer** label
+- [ ] Drive/Support: Google Contact exists with **Volunteers** label
 - [ ] Drive/Support: guest on upcoming `[Cars & Kids]` events + calendar invite received
 - [ ] Drive/Support: welcome in inbox (To `max@`, volunteer BCC'd)
 
@@ -126,7 +126,7 @@ cd forms-handler
 | Welcome not sent / `send as` error | Add **max@carsandkids.net** under Gmail → Settings → Accounts → Send mail as |
 | Contact or calendar error in notify subject | Services (+) must list **People API** and **Google Calendar API**. Then **Deploy → Manage deployments → pencil → New version** (editor-only enable does not update `/exec`). Re-authorize if prompted. Run `checkAdvancedServices` in the editor to confirm the libraries loaded. |
 | No calendar invites | Title events with `[Cars & Kids]`; confirm they are upcoming; confirm writer access |
-| Duplicate welcome | Repeat signups that already have the Volunteer label skip a second welcome |
+| Duplicate welcome | Repeat signups that already have the Volunteers label (or the old Volunteer label) skip a second welcome |
 | `Invalid form type` | Website must send `formType`: `drive`, `visit`, or `support` |
 | Spam submissions | Honeypot field `website` must stay hidden; add reCAPTCHA v3 later if needed |
 

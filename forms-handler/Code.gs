@@ -2,13 +2,13 @@
  * Cars & Kids website form handler
  * Bound to "Cars & Kids Intake" spreadsheet — run setupIntakeSheet() once after paste.
  *
- * Drive + Support also: upsert Google Contact (Volunteer label), invite to upcoming
+ * Drive + Support also: upsert Google Contact (Volunteers label), invite to upcoming
  * [Cars & Kids] calendar events, send welcome (To max@, BCC volunteer).
  */
 
 var CONFIG = {
   // Bump this when changing doPost / sheet write / CRM logic — health check returns it
-  VERSION: '2026-09-03-volunteer-crm-services',
+  VERSION: '2026-09-03-support-phone-volunteers-label',
   NOTIFY_EMAIL: 'info@carsandkids.net',
   FROM_EMAIL: 'info@carsandkids.net',
   FROM_NAME: 'Cars & Kids',
@@ -17,7 +17,9 @@ var CONFIG = {
   WELCOME_TO: 'max@carsandkids.net',
   WELCOME_FROM: 'max@carsandkids.net',
   WELCOME_FROM_NAME: 'Max Bartnitski',
-  VOLUNTEER_LABEL: 'Volunteer',
+  VOLUNTEER_LABEL: 'Volunteers',
+  // Old names still count as already-in-CRM so we do not send a second welcome.
+  LEGACY_VOLUNTEER_LABELS: ['Volunteer', 'VOLUNTEERS'],
   EVENT_TITLE_TAG: '[Cars & Kids]',
   CALENDAR_LOOKAHEAD_MONTHS: 18,
   // Editor tests skip live calendar invites unless you set this true on purpose.
@@ -47,7 +49,7 @@ HEADERS[TAB.VISIT] = [
   'location', 'constraints', 'timing',
 ];
 HEADERS[TAB.SUPPORT] = [
-  'submitted_at', 'status', 'name', 'email', 'org', 'support_types', 'notes',
+  'submitted_at', 'status', 'name', 'email', 'phone', 'org', 'support_types', 'notes',
 ];
 
 var FORM_LABELS = {
@@ -70,6 +72,8 @@ function setupIntakeSheet() {
   if (!ss) {
     throw new Error('Open this script from Extensions > Apps Script on the intake spreadsheet.');
   }
+
+  migrateSupportPhoneColumn_(ss);
 
   Object.keys(HEADERS).forEach(function (tabName) {
     var sheet = ss.getSheetByName(tabName);
@@ -98,6 +102,30 @@ function setupIntakeSheet() {
   }
 
   Logger.log('Intake sheet ready: ' + ss.getUrl());
+}
+
+function migrateSupportPhoneColumn_(ss) {
+  var sheet = ss.getSheetByName(TAB.SUPPORT);
+  if (!sheet) return;
+
+  var lastCol = Math.max(sheet.getLastColumn(), 1);
+  var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function (h) {
+    return String(h || '').trim();
+  });
+
+  if (headers[4] === 'phone') return;
+
+  var isOld = headers[0] === 'submitted_at' && headers[3] === 'email' && headers[4] === 'org';
+  if (!isOld) {
+    if (sheet.getLastRow() <= 1) return;
+    throw new Error(
+      'Support tab headers are unexpected; will not insert a phone column. Got: ' +
+      headers.join(', ')
+    );
+  }
+
+  sheet.insertColumnAfter(4);
+  Logger.log('Migrated Support tab: inserted phone column after email.');
 }
 
 function doPost(e) {
@@ -200,6 +228,7 @@ function normalizeSubmission_(formType, data) {
   return {
     name: trim(data.name),
     email: trim(data.email).toLowerCase(),
+    phone: trim(data.phone),
     org: trim(data.org),
     supportTypes: arr(data.supportType || data.supportTypes),
     notes: trim(data.notes),
@@ -265,10 +294,10 @@ function appendSubmission_(formType, data) {
   }
 
   appendRow_(ss, TAB.SUPPORT, [
-    now, status, data.name, data.email, data.org, data.supportTypes.join('; '), data.notes,
+    now, status, data.name, data.email, data.phone, data.org, data.supportTypes.join('; '), data.notes,
   ]);
   appendRow_(ss, TAB.ALL, [
-    now, formType, status, data.name, data.email, '',
+    now, formType, status, data.name, data.email, data.phone,
     '', data.org, '', '', '',
     '', '', '', '', '', '',
     data.supportTypes.join('; '), data.notes,
@@ -433,7 +462,7 @@ function listContactGroups_() {
   var pageToken;
   do {
     var res = People.ContactGroups.list({
-      groupFields: 'name,groupType,memberCount',
+      groupFields: 'name,groupType,memberCount,etag',
       pageToken: pageToken,
     });
     var items = (res && res.contactGroups) || [];
@@ -445,22 +474,61 @@ function listContactGroups_() {
   return groups;
 }
 
-function ensureVolunteerGroup_() {
-  var wanted = CONFIG.VOLUNTEER_LABEL.toLowerCase();
-  var groups = listContactGroups_();
+function findContactGroupByName_(groups, name) {
+  var wanted = String(name || '').toLowerCase();
   for (var i = 0; i < groups.length; i++) {
-    var name = (groups[i].name || '').toLowerCase();
-    if (name === wanted) {
+    if ((groups[i].name || '').toLowerCase() === wanted) {
       return groups[i];
     }
   }
+  return null;
+}
+
+function ensureVolunteerGroup_() {
+  var wanted = CONFIG.VOLUNTEER_LABEL;
+  var groups = listContactGroups_();
+  var existing = findContactGroupByName_(groups, wanted);
+  if (existing) {
+    if ((existing.name || '') === wanted) return existing;
+    if (!existing.etag) {
+      throw new Error(
+        'Contact group "' + existing.name + '" needs to be named "' + wanted +
+        '" but has no etag. Rename it in Google Contacts, then retry.'
+      );
+    }
+    var renamed = People.ContactGroups.update({
+      contactGroup: {
+        etag: existing.etag,
+        name: wanted,
+      },
+    }, existing.resourceName, {
+      updateGroupFields: 'name',
+    });
+    if (!renamed || (renamed.name || '') !== wanted) {
+      throw new Error('People API failed to rename contact group to ' + wanted + '.');
+    }
+    return renamed;
+  }
   var created = People.ContactGroups.create({
-    contactGroup: { name: CONFIG.VOLUNTEER_LABEL },
+    contactGroup: { name: wanted },
   });
   if (!created || !created.resourceName) {
-    throw new Error('People API created no Volunteer contact group.');
+    throw new Error('People API created no ' + wanted + ' contact group.');
   }
   return created;
+}
+
+function personHasVolunteerLabel_(person) {
+  if (!person) return false;
+  var groups = listContactGroups_();
+  var names = [CONFIG.VOLUNTEER_LABEL].concat(CONFIG.LEGACY_VOLUNTEER_LABELS || []);
+  for (var i = 0; i < names.length; i++) {
+    var group = findContactGroupByName_(groups, names[i]);
+    if (group && personInGroup_(person, group.resourceName)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function personInGroup_(person, groupResourceName) {
@@ -491,7 +559,7 @@ function upsertVolunteerContact_(formType, data) {
   var group = ensureVolunteerGroup_();
   var groupResourceName = group.resourceName;
   var existing = findContactByEmail_(data.email);
-  var alreadyVolunteer = existing ? personInGroup_(existing, groupResourceName) : false;
+  var alreadyVolunteer = personHasVolunteerLabel_(existing);
   var notes = contactNotes_(formType, data);
 
   if (!existing) {
@@ -793,7 +861,7 @@ function buildCrmPlain_(crm) {
     });
   }
   if (crm.contactOk) {
-    lines.push(crm.alreadyVolunteer ? 'Contact: existing Volunteer (updated).' : 'Contact: created/updated + Volunteer label.');
+    lines.push(crm.alreadyVolunteer ? 'Contact: existing Volunteers (updated).' : 'Contact: created/updated + Volunteers label.');
   }
   if (crm.eventsAdded.length) {
     lines.push('Calendar invites sent:');
@@ -810,7 +878,7 @@ function buildCrmPlain_(crm) {
   if (crm.welcomeSent) {
     lines.push('Welcome email: sent to ' + CONFIG.WELCOME_TO + ' (BCC volunteer).');
   } else if (crm.welcomeSkipped) {
-    lines.push('Welcome email: skipped (already a Volunteer).');
+    lines.push('Welcome email: skipped (already has Volunteers label).');
   }
   return lines;
 }
@@ -840,6 +908,7 @@ function buildNotifyPlain_(formType, data, crm) {
   } else {
     lines.push('Name: ' + data.name);
     lines.push('Email: ' + data.email);
+    lines.push('Phone: ' + (data.phone || '(none)'));
     lines.push('Organization: ' + (data.org || '(none)'));
     lines.push('Support types: ' + (data.supportTypes.length ? data.supportTypes.join(', ') : '(none)'));
     lines.push('Notes: ' + (data.notes || '(none)'));
@@ -874,7 +943,7 @@ function buildCrmHtml_(crm) {
   }
   var rows = [];
   if (crm.contactOk) {
-    rows.push(crm.alreadyVolunteer ? 'Existing Volunteer (updated)' : 'Created/updated + Volunteer label');
+    rows.push(crm.alreadyVolunteer ? 'Existing Volunteers (updated)' : 'Created/updated + Volunteers label');
   }
   if (crm.eventsAdded.length) {
     rows.push('Invites sent: ' + crm.eventsAdded.join('; '));
@@ -885,7 +954,7 @@ function buildCrmHtml_(crm) {
   if (crm.welcomeSent) {
     rows.push('Welcome sent to ' + CONFIG.WELCOME_TO + ' (BCC volunteer)');
   } else if (crm.welcomeSkipped) {
-    rows.push('Welcome skipped (already a Volunteer)');
+    rows.push('Welcome skipped (already has Volunteers label)');
   }
   if (rows.length) {
     chunks.push('<p>' + rows.map(function (r) { return escapeHtml_(r); }).join('<br>') + '</p>');
@@ -924,6 +993,7 @@ function buildNotifyHtml_(formType, data, crm) {
   } else {
     add('Name', data.name);
     add('Email', data.email);
+    add('Phone', data.phone);
     add('Organization', data.org);
     add('Support types', data.supportTypes.join(', '));
     add('Notes', data.notes);
@@ -1081,6 +1151,12 @@ function findLatestVolunteerSubmission_(email) {
   if (!support) {
     throw new Error('Missing tab "Support" — run setupIntakeSheet() first.');
   }
+  var supportHeader = support.getRange(1, 1, 1, HEADERS[TAB.SUPPORT].length).getValues()[0];
+  if (String(supportHeader[4] || '').trim() !== 'phone') {
+    throw new Error(
+      'Support tab is missing the phone column. Run setupIntakeSheet() before retryVolunteerCrm.'
+    );
+  }
   var supportRows = support.getDataRange().getValues();
   for (i = 1; i < supportRows.length; i++) {
     var s = supportRows[i];
@@ -1091,9 +1167,10 @@ function findLatestVolunteerSubmission_(email) {
       data: {
         name: String(s[2] || '').trim(),
         email: needle,
-        org: String(s[4] || '').trim(),
-        supportTypes: splitSheetList_(s[5]),
-        notes: String(s[6] || '').trim(),
+        phone: String(s[4] || '').trim(),
+        org: String(s[5] || '').trim(),
+        supportTypes: splitSheetList_(s[6]),
+        notes: String(s[7] || '').trim(),
       },
     });
   }
@@ -1150,6 +1227,7 @@ function testSupportSubmission() {
     formType: 'support',
     name: 'Test Supporter',
     email: TEST_EMAIL,
+    phone: '555-0102',
     org: 'Test Company',
     supportType: ['Sponsorship'],
     notes: 'Apps Script test submission',
