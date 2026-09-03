@@ -8,7 +8,7 @@
 
 var CONFIG = {
   // Bump this when changing doPost / sheet write / CRM logic — health check returns it
-  VERSION: '2026-09-01-volunteer-crm',
+  VERSION: '2026-09-03-volunteer-crm-services',
   NOTIFY_EMAIL: 'info@carsandkids.net',
   FROM_EMAIL: 'info@carsandkids.net',
   FROM_NAME: 'Cars & Kids',
@@ -355,7 +355,7 @@ function runVolunteerCrm_(formType, data, options) {
 function assertPeopleApi_() {
   if (typeof People === 'undefined') {
     throw new Error(
-      'People API advanced service is not enabled. In Apps Script: Services (+) → People API.'
+      'People API is not loaded on this deployment. In Apps Script: Services (+) → People API, Save, then Deploy → Manage deployments → pencil → New version. Adding it only in the editor does not update the live form.'
     );
   }
 }
@@ -363,7 +363,7 @@ function assertPeopleApi_() {
 function assertCalendarApi_() {
   if (typeof Calendar === 'undefined') {
     throw new Error(
-      'Calendar API advanced service is not enabled. In Apps Script: Services (+) → Google Calendar API.'
+      'Google Calendar API is not loaded on this deployment. In Apps Script: Services (+) → Google Calendar API, Save, then Deploy → Manage deployments → pencil → New version. Adding it only in the editor does not update the live form.'
     );
   }
 }
@@ -763,6 +763,12 @@ function buildNotifySubject_(formType, data, crm) {
     var orgPart = data.org ? ' (' + data.org + ')' : '';
     core = prefix + ' — ' + data.name + orgPart;
   }
+  if (crm.retry) {
+    if (crm.errors && crm.errors.length) {
+      return '[Cars & Kids] CRM RETRY FAILED — ' + core;
+    }
+    return '[Cars & Kids] CRM RETRY — ' + core;
+  }
   if (crm.errors && crm.errors.length) {
     return '[Cars & Kids] CONTACT/CALENDAR/WELCOME FAILED — ' + core;
   }
@@ -954,6 +960,158 @@ function jsonResponse_(obj) {
  * Calendar invites are skipped unless CONFIG.TEST_SEND_CALENDAR is true.
  */
 var TEST_EMAIL = 'max@carsandkids.net';
+
+/**
+ * Run from the editor to confirm People + Calendar advanced services are loaded
+ * in THIS project (editor HEAD). The live website still needs a New version deploy.
+ */
+function checkAdvancedServices() {
+  var missing = [];
+  if (typeof People === 'undefined') missing.push('People API');
+  if (typeof Calendar === 'undefined') missing.push('Google Calendar API');
+  if (missing.length) {
+    throw new Error(
+      'Not enabled in this script: ' + missing.join(', ') +
+      '. Left sidebar Services (+) → add each one → Save.'
+    );
+  }
+  Logger.log('People API and Google Calendar API are loaded in the editor.');
+}
+
+/**
+ * Set this, then run retryVolunteerCrm() from the editor after services are enabled.
+ * Replays Contact + Calendar for that email from the latest Drive/Support sheet row.
+ * Does not send a second welcome.
+ */
+var RETRY_EMAIL = 'amypeet@live.com';
+
+function retryVolunteerCrm() {
+  checkAdvancedServices();
+  var email = String(RETRY_EMAIL || '').trim().toLowerCase();
+  if (!email) {
+    throw new Error('Set RETRY_EMAIL, then run retryVolunteerCrm.');
+  }
+
+  var found = findLatestVolunteerSubmission_(email);
+  if (!found) {
+    throw new Error(
+      'No Drive or Support row for ' + email + '. Check the Cars & Kids Intake sheet.'
+    );
+  }
+
+  var crm = emptyCrmResult_();
+  crm.retry = true;
+  crm.welcomeSkipped = true;
+
+  try {
+    var contactInfo = upsertVolunteerContact_(found.formType, found.data);
+    crm.alreadyVolunteer = !!contactInfo.alreadyVolunteer;
+    crm.contactOk = true;
+  } catch (err) {
+    crm.errors.push('Google Contact: ' + (err.message || err));
+  }
+
+  try {
+    var cal = inviteToUpcomingEvents_(found.data.email);
+    crm.eventsAdded = cal.added;
+    crm.eventsSkipped = cal.skipped;
+    crm.eventsNoneFound = cal.noneFound;
+    if (cal.noneFound) {
+      crm.warnings.push('NO UPCOMING [Cars & Kids] EVENTS');
+    }
+    if (cal.failures && cal.failures.length) {
+      crm.errors.push('Calendar: ' + cal.failures.join('; '));
+    }
+  } catch (err) {
+    crm.errors.push('Calendar: ' + (err.message || err));
+  }
+
+  sendNotificationEmail_(found.formType, found.data, crm);
+  Logger.log(JSON.stringify({
+    email: email,
+    formType: found.formType,
+    contactOk: crm.contactOk,
+    eventsAdded: crm.eventsAdded,
+    eventsSkipped: crm.eventsSkipped,
+    errors: crm.errors,
+    warnings: crm.warnings,
+  }));
+  if (crm.errors.length) {
+    throw new Error('CRM retry failed: ' + crm.errors.join(' | '));
+  }
+}
+
+function findLatestVolunteerSubmission_(email) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) {
+    throw new Error('Open this script from Extensions > Apps Script on the intake spreadsheet.');
+  }
+
+  var needle = String(email || '').trim().toLowerCase();
+  if (!needle) {
+    throw new Error('email is required.');
+  }
+
+  var candidates = [];
+  var drive = ss.getSheetByName(TAB.DRIVE);
+  if (!drive) {
+    throw new Error('Missing tab "Drive" — run setupIntakeSheet() first.');
+  }
+  var driveRows = drive.getDataRange().getValues();
+  var i;
+  for (i = 1; i < driveRows.length; i++) {
+    var d = driveRows[i];
+    if (String(d[3] || '').trim().toLowerCase() !== needle) continue;
+    candidates.push({
+      at: d[0],
+      formType: 'drive',
+      data: {
+        name: String(d[2] || '').trim(),
+        email: needle,
+        phone: String(d[4] || '').trim(),
+        car: String(d[5] || '').trim(),
+        canDo: splitSheetList_(d[6]),
+        availability: String(d[7] || '').trim(),
+        why: String(d[8] || '').trim(),
+      },
+    });
+  }
+
+  var support = ss.getSheetByName(TAB.SUPPORT);
+  if (!support) {
+    throw new Error('Missing tab "Support" — run setupIntakeSheet() first.');
+  }
+  var supportRows = support.getDataRange().getValues();
+  for (i = 1; i < supportRows.length; i++) {
+    var s = supportRows[i];
+    if (String(s[3] || '').trim().toLowerCase() !== needle) continue;
+    candidates.push({
+      at: s[0],
+      formType: 'support',
+      data: {
+        name: String(s[2] || '').trim(),
+        email: needle,
+        org: String(s[4] || '').trim(),
+        supportTypes: splitSheetList_(s[5]),
+        notes: String(s[6] || '').trim(),
+      },
+    });
+  }
+
+  if (!candidates.length) return null;
+
+  candidates.sort(function (a, b) {
+    return new Date(b.at).getTime() - new Date(a.at).getTime();
+  });
+  return candidates[0];
+}
+
+function splitSheetList_(value) {
+  return String(value || '')
+    .split(';')
+    .map(function (part) { return part.trim(); })
+    .filter(Boolean);
+}
 
 function testDriveSubmission() {
   runTestSubmission_({

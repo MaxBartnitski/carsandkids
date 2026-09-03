@@ -47,11 +47,15 @@ After changing headers: paste updated `Code.gs`, run **`setupIntakeSheet`**, the
 
 ## 4. Deploy as web app
 
+**First time only:**
+
 1. **Deploy** → **New deployment**
 2. Type: **Web app**
 3. Execute as: **Me** — must be **`max@makobabusiness.com`** (Contacts + calendar live on this account)
 4. Who has access: **Anyone**
-5. Deploy → copy the **Web app URL** (ends in `/exec`)
+5. Deploy → copy the **Web app URL** (ends in `/exec`) and put it in `forms-config.js`
+
+**Every later update:** **Deploy → Manage deployments → pencil on that same web app → New version.** The `/exec` URL must stay the same. If the URL changes, you created a new deployment; update `forms-config.js` and push, or archive the extra deployment and edit the one the site already uses.
 
 Test health check in browser:
 
@@ -120,7 +124,7 @@ cd forms-handler
 | Sheet row missing | Run `setupIntakeSheet()`; confirm script is bound to the spreadsheet |
 | Notification not sent | Confirm **Send mail as** info@ is verified on the deploying account |
 | Welcome not sent / `send as` error | Add **max@carsandkids.net** under Gmail → Settings → Accounts → Send mail as |
-| Contact or calendar error in notify subject | Enable People API + Calendar API services; re-authorize; redeploy as max@makobabusiness.com |
+| Contact or calendar error in notify subject | Services (+) must list **People API** and **Google Calendar API**. Then **Deploy → Manage deployments → pencil → New version** (editor-only enable does not update `/exec`). Re-authorize if prompted. Run `checkAdvancedServices` in the editor to confirm the libraries loaded. |
 | No calendar invites | Title events with `[Cars & Kids]`; confirm they are upcoming; confirm writer access |
 | Duplicate welcome | Repeat signups that already have the Volunteer label skip a second welcome |
 | `Invalid form type` | Website must send `formType`: `drive`, `visit`, or `support` |
@@ -132,10 +136,14 @@ If Contact, Calendar, or welcome fails after the Sheet write, the volunteer stil
 
 After editing `Code.gs` in Apps Script:
 
-1. Enable People API + Calendar API if they are not already on
-2. **Deploy** → **Manage deployments** → edit → **New version** → Deploy
+1. Enable People API + Calendar API if they are not already on (left sidebar **Services (+)**)
+2. **Deploy** → **Manage deployments** → pencil on the **existing** web app → **New version** → Deploy
 3. The `/exec` URL stays the same — no website change needed
 4. Confirm `?health=1` `version` matches `CONFIG.VERSION`
+
+Enabling a service in the editor updates only the draft. The website keeps running the last deployed snapshot until you create a **New version**.
+
+To replay Contact + Calendar for someone who already got a welcome (no second welcome): set `RETRY_EMAIL` in `Code.gs`, then run **`retryVolunteerCrm`**.
 
 ## Optional: clasp sync
 
