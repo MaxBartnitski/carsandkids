@@ -8,7 +8,7 @@
 
 var CONFIG = {
   // Bump this when changing doPost / sheet write / CRM logic — health check returns it
-  VERSION: '2026-09-03-support-phone-volunteers-label',
+  VERSION: '2026-09-08-contact-group-fields',
   NOTIFY_EMAIL: 'info@carsandkids.net',
   FROM_EMAIL: 'info@carsandkids.net',
   FROM_NAME: 'Cars & Kids',
@@ -456,13 +456,17 @@ function findContactByEmail_(email) {
   return null;
 }
 
+// People API groupFields allows only clientData, groupType, memberCount, metadata, name.
+// etag is a resource field (not a mask path) and is rejected by contactGroups.list/get.
+var CONTACT_GROUP_FIELDS = 'name,groupType,memberCount,metadata';
+
 function listContactGroups_() {
   assertPeopleApi_();
   var groups = [];
   var pageToken;
   do {
     var res = People.ContactGroups.list({
-      groupFields: 'name,groupType,memberCount,etag',
+      groupFields: CONTACT_GROUP_FIELDS,
       pageToken: pageToken,
     });
     var items = (res && res.contactGroups) || [];
@@ -472,6 +476,20 @@ function listContactGroups_() {
     pageToken = res && res.nextPageToken;
   } while (pageToken);
   return groups;
+}
+
+function getContactGroup_(resourceName) {
+  assertPeopleApi_();
+  if (!resourceName) {
+    throw new Error('Contact group resourceName is required.');
+  }
+  var group = People.ContactGroups.get(resourceName, {
+    groupFields: CONTACT_GROUP_FIELDS,
+  });
+  if (!group || !group.resourceName) {
+    throw new Error('People API returned no contact group for ' + resourceName + '.');
+  }
+  return group;
 }
 
 function findContactGroupByName_(groups, name) {
@@ -490,18 +508,19 @@ function ensureVolunteerGroup_() {
   var existing = findContactGroupByName_(groups, wanted);
   if (existing) {
     if ((existing.name || '') === wanted) return existing;
-    if (!existing.etag) {
+    var current = getContactGroup_(existing.resourceName);
+    if (!current.etag) {
       throw new Error(
-        'Contact group "' + existing.name + '" needs to be named "' + wanted +
+        'Contact group "' + current.name + '" needs to be named "' + wanted +
         '" but has no etag. Rename it in Google Contacts, then retry.'
       );
     }
     var renamed = People.ContactGroups.update({
       contactGroup: {
-        etag: existing.etag,
+        etag: current.etag,
         name: wanted,
       },
-    }, existing.resourceName, {
+    }, current.resourceName, {
       updateGroupFields: 'name',
     });
     if (!renamed || (renamed.name || '') !== wanted) {
@@ -1111,15 +1130,186 @@ function retryVolunteerCrm() {
   }
 }
 
-function findLatestVolunteerSubmission_(email) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  if (!ss) {
-    throw new Error('Open this script from Extensions > Apps Script on the intake spreadsheet.');
+/**
+ * Run from the editor after the contactGroups.list field-mask fix.
+ * Compares Drive + Support (latest row per email) to Google Contacts and
+ * creates/updates anyone missing or not labeled Volunteers.
+ * Does not send welcome mail or calendar invites.
+ */
+function backfillMissingVolunteerContacts() {
+  checkAdvancedServices();
+  var submissions = listLatestVolunteerSubmissions_();
+  if (!submissions.length) {
+    throw new Error('No Drive or Support rows in the intake sheet.');
   }
 
+  var contactsByEmail = loadContactsByEmail_();
+  var volunteerGroups = volunteerGroupResourceNames_();
+  var present = [];
+  var updated = [];
+  var errors = [];
+  var i;
+
+  for (i = 0; i < submissions.length; i++) {
+    var row = submissions[i];
+    var email = row.data.email;
+    var person = contactsByEmail[email] || null;
+    var labeled = personIsInAnyGroup_(person, volunteerGroups);
+    if (person && labeled) {
+      present.push(email + ' (' + row.data.name + ')');
+      continue;
+    }
+    try {
+      upsertVolunteerContact_(row.formType, row.data);
+      updated.push(email + ' (' + row.data.name + ')');
+    } catch (err) {
+      errors.push(email + ': ' + (err.message || err));
+    }
+  }
+
+  var report = {
+    sheetPeople: submissions.length,
+    alreadyLabeled: present,
+    createdOrUpdated: updated,
+    errors: errors,
+  };
+  Logger.log(JSON.stringify(report, null, 2));
+  sendBackfillReport_(report);
+  if (errors.length) {
+    throw new Error('Contact backfill incomplete: ' + errors.join(' | '));
+  }
+}
+
+function sendBackfillReport_(report) {
+  var lines = [
+    'Intake Drive/Support vs Google Contacts',
+    '',
+    'Sheet people (unique email): ' + report.sheetPeople,
+    'Already labeled Volunteers: ' + report.alreadyLabeled.length,
+    'Created/updated: ' + report.createdOrUpdated.length,
+    'Errors: ' + report.errors.length,
+  ];
+  if (report.createdOrUpdated.length) {
+    lines.push('', 'Created/updated:');
+    report.createdOrUpdated.forEach(function (item) {
+      lines.push('- ' + item);
+    });
+  }
+  if (report.alreadyLabeled.length) {
+    lines.push('', 'Already labeled:');
+    report.alreadyLabeled.forEach(function (item) {
+      lines.push('- ' + item);
+    });
+  }
+  if (report.errors.length) {
+    lines.push('', 'Errors:');
+    report.errors.forEach(function (item) {
+      lines.push('- ' + item);
+    });
+  }
+
+  var subject = report.errors.length
+    ? '[Cars & Kids] CONTACT BACKFILL FAILED'
+    : '[Cars & Kids] CONTACT BACKFILL — ' + report.createdOrUpdated.length + ' updated';
+  GmailApp.sendEmail(CONFIG.NOTIFY_EMAIL, subject, lines.join('\n'), {
+    name: CONFIG.FROM_NAME,
+  });
+}
+
+function loadContactsByEmail_() {
+  assertPeopleApi_();
+  var fields = 'names,emailAddresses,phoneNumbers,biographies,memberships,metadata';
+  var byEmail = {};
+  var pageToken;
+  do {
+    var conn = People.People.Connections.list('people/me', {
+      personFields: fields,
+      pageSize: 200,
+      pageToken: pageToken,
+    });
+    var people = (conn && conn.connections) || [];
+    var i;
+    for (i = 0; i < people.length; i++) {
+      var addresses = people[i].emailAddresses || [];
+      var j;
+      for (j = 0; j < addresses.length; j++) {
+        var value = addresses[j].value && addresses[j].value.toLowerCase();
+        if (value) {
+          byEmail[value] = people[i];
+        }
+      }
+    }
+    pageToken = conn && conn.nextPageToken;
+  } while (pageToken);
+  return byEmail;
+}
+
+function volunteerGroupResourceNames_() {
+  var groups = listContactGroups_();
+  var names = [CONFIG.VOLUNTEER_LABEL].concat(CONFIG.LEGACY_VOLUNTEER_LABELS || []);
+  var resourceNames = [];
+  var i;
+  for (i = 0; i < names.length; i++) {
+    var group = findContactGroupByName_(groups, names[i]);
+    if (group && group.resourceName) {
+      resourceNames.push(group.resourceName);
+    }
+  }
+  return resourceNames;
+}
+
+function personIsInAnyGroup_(person, groupResourceNames) {
+  if (!person || !groupResourceNames || !groupResourceNames.length) return false;
+  return groupResourceNames.some(function (resourceName) {
+    return personInGroup_(person, resourceName);
+  });
+}
+
+function findLatestVolunteerSubmission_(email) {
   var needle = String(email || '').trim().toLowerCase();
   if (!needle) {
     throw new Error('email is required.');
+  }
+  var latest = listLatestVolunteerSubmissions_();
+  var i;
+  for (i = 0; i < latest.length; i++) {
+    if (latest[i].data.email === needle) return latest[i];
+  }
+  return null;
+}
+
+function listLatestVolunteerSubmissions_() {
+  var all = listVolunteerSubmissions_();
+  var byEmail = {};
+  var i;
+  for (i = 0; i < all.length; i++) {
+    var email = all[i].data.email;
+    var prev = byEmail[email];
+    if (!prev || submissionTime_(all[i].at) > submissionTime_(prev.at)) {
+      byEmail[email] = all[i];
+    }
+  }
+  var latest = Object.keys(byEmail).map(function (key) {
+    return byEmail[key];
+  });
+  latest.sort(function (a, b) {
+    return submissionTime_(b.at) - submissionTime_(a.at);
+  });
+  return latest;
+}
+
+function submissionTime_(value) {
+  var ms = new Date(value).getTime();
+  if (isNaN(ms)) {
+    throw new Error('Intake row has an invalid submitted_at value: ' + value);
+  }
+  return ms;
+}
+
+function listVolunteerSubmissions_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) {
+    throw new Error('Open this script from Extensions > Apps Script on the intake spreadsheet.');
   }
 
   var candidates = [];
@@ -1131,13 +1321,21 @@ function findLatestVolunteerSubmission_(email) {
   var i;
   for (i = 1; i < driveRows.length; i++) {
     var d = driveRows[i];
-    if (String(d[3] || '').trim().toLowerCase() !== needle) continue;
+    if (isBlankSheetRow_(d)) continue;
+    var driveEmail = String(d[3] || '').trim().toLowerCase();
+    var driveName = String(d[2] || '').trim();
+    if (!driveEmail) {
+      throw new Error('Drive row ' + (i + 1) + ' is missing an email.');
+    }
+    if (!driveName) {
+      throw new Error('Drive row ' + (i + 1) + ' is missing a name.');
+    }
     candidates.push({
       at: d[0],
       formType: 'drive',
       data: {
-        name: String(d[2] || '').trim(),
-        email: needle,
+        name: driveName,
+        email: driveEmail,
         phone: String(d[4] || '').trim(),
         car: String(d[5] || '').trim(),
         canDo: splitSheetList_(d[6]),
@@ -1160,13 +1358,21 @@ function findLatestVolunteerSubmission_(email) {
   var supportRows = support.getDataRange().getValues();
   for (i = 1; i < supportRows.length; i++) {
     var s = supportRows[i];
-    if (String(s[3] || '').trim().toLowerCase() !== needle) continue;
+    if (isBlankSheetRow_(s)) continue;
+    var supportEmail = String(s[3] || '').trim().toLowerCase();
+    var supportName = String(s[2] || '').trim();
+    if (!supportEmail) {
+      throw new Error('Support row ' + (i + 1) + ' is missing an email.');
+    }
+    if (!supportName) {
+      throw new Error('Support row ' + (i + 1) + ' is missing a name.');
+    }
     candidates.push({
       at: s[0],
       formType: 'support',
       data: {
-        name: String(s[2] || '').trim(),
-        email: needle,
+        name: supportName,
+        email: supportEmail,
         phone: String(s[4] || '').trim(),
         org: String(s[5] || '').trim(),
         supportTypes: splitSheetList_(s[6]),
@@ -1175,12 +1381,16 @@ function findLatestVolunteerSubmission_(email) {
     });
   }
 
-  if (!candidates.length) return null;
+  return candidates;
+}
 
-  candidates.sort(function (a, b) {
-    return new Date(b.at).getTime() - new Date(a.at).getTime();
-  });
-  return candidates[0];
+function isBlankSheetRow_(row) {
+  if (!row || !row.length) return true;
+  var i;
+  for (i = 0; i < row.length; i++) {
+    if (String(row[i] || '').trim() !== '') return false;
+  }
+  return true;
 }
 
 function splitSheetList_(value) {
