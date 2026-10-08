@@ -11,6 +11,190 @@
         throw new Error(message);
     }
 
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+        })[char]);
+    }
+
+    const TZ = 'America/Denver';
+
+    function parseInstant(value, label) {
+        const ms = Date.parse(value);
+        if (Number.isNaN(ms)) {
+            failLoud(label + ' is not a valid time: ' + value);
+        }
+        return ms;
+    }
+
+    function formatLongDate(iso) {
+        return new Intl.DateTimeFormat('en-US', {
+            timeZone: TZ,
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+        }).format(new Date(iso));
+    }
+
+    function formatShortDate(iso) {
+        return new Intl.DateTimeFormat('en-US', {
+            timeZone: TZ,
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+        }).format(new Date(iso));
+    }
+
+    function formatTime(iso) {
+        return new Intl.DateTimeFormat('en-US', {
+            timeZone: TZ,
+            hour: 'numeric',
+            minute: '2-digit',
+        }).format(new Date(iso));
+    }
+
+    function formatTimeRange(event) {
+        const start = formatTime(event.start);
+        if (!event.end) {
+            return start;
+        }
+        return start + '\u2013' + formatTime(event.end);
+    }
+
+    function loadEvents() {
+        const events = window.CARS_AND_KIDS_EVENTS;
+        if (!Array.isArray(events) || events.length === 0) {
+            failLoud('Event list is missing or empty.');
+        }
+        const ids = new Set();
+        events.forEach((event) => {
+            ['id', 'title', 'start', 'pastAt', 'location', 'blurb', 'flyer', 'flyerAlt'].forEach((key) => {
+                if (typeof event[key] !== 'string' || event[key].trim() === '') {
+                    failLoud('Event is missing ' + key + '.');
+                }
+            });
+            if (ids.has(event.id)) {
+                failLoud('Duplicate event id: ' + event.id);
+            }
+            ids.add(event.id);
+            parseInstant(event.start, event.id + ' start');
+            parseInstant(event.pastAt, event.id + ' pastAt');
+            if (event.end) {
+                parseInstant(event.end, event.id + ' end');
+            }
+        });
+        return events;
+    }
+
+    function splitEvents(events) {
+        const now = Date.now();
+        const upcoming = events
+            .filter((event) => now < parseInstant(event.pastAt, event.id + ' pastAt'))
+            .sort((a, b) => parseInstant(a.start, a.id) - parseInstant(b.start, b.id));
+        const past = events
+            .filter((event) => now >= parseInstant(event.pastAt, event.id + ' pastAt'))
+            .sort((a, b) => parseInstant(b.start, b.id) - parseInstant(a.start, a.id));
+        return { upcoming, past };
+    }
+
+    function assetUrl(path) {
+        const prefix = document.body.dataset.assetPrefix;
+        if (prefix === undefined) {
+            failLoud('Page is missing data-asset-prefix.');
+        }
+        if (prefix === '') {
+            return path;
+        }
+        return prefix + '/' + path;
+    }
+
+    function renderEventCard(event, isUpcoming) {
+        const address = event.address
+            ? '<span class="event-address">' + escapeHtml(event.address) + '</span>'
+            : '';
+        const cta = isUpcoming
+            ? '<a href="/#get-involved" class="btn-primary event-card-cta">Bring your car</a>'
+            : '';
+        return [
+            '<article class="event-card">',
+            '<div class="event-card-copy">',
+            '<dl class="event-meta">',
+            '<dt>Date</dt><dd>' + escapeHtml(formatLongDate(event.start)) + '</dd>',
+            '<dt>Time</dt><dd>' + escapeHtml(formatTimeRange(event)) + '</dd>',
+            '<dt>Location</dt><dd>' + escapeHtml(event.location) + address + '</dd>',
+            '</dl>',
+            '<p class="event-blurb">' + escapeHtml(event.blurb) + '</p>',
+            cta,
+            '</div>',
+            '<figure class="event-flyer">',
+            '<button type="button" class="lightbox-trigger" aria-label="View larger event flyer">',
+            '<img src="' + escapeHtml(assetUrl(event.flyer)) + '" alt="' + escapeHtml(event.flyerAlt) + '">',
+            '</button>',
+            '</figure>',
+            '</article>',
+        ].join('');
+    }
+
+    function renderEvents(page) {
+        const { upcoming, past } = splitEvents(loadEvents());
+        if (page === 'home') {
+            const section = document.getElementById('next-event');
+            const label = document.getElementById('next-event-label');
+            const details = document.getElementById('next-event-details');
+            const link = document.getElementById('next-event-link');
+            if (!section || !label || !details || !link) {
+                failLoud('Home page is missing the next-event block.');
+            }
+            const next = upcoming[0];
+            if (!next) {
+                label.textContent = 'Events';
+                details.textContent = 'Nothing scheduled right now.';
+                link.textContent = 'See events';
+            } else {
+                label.textContent = 'Next event';
+                details.textContent = formatShortDate(next.start) + ' · ' + formatTimeRange(next) + ' · ' + next.location;
+                link.textContent = 'Event details';
+            }
+            link.href = '/events/';
+            section.hidden = false;
+        }
+        if (page === 'events') {
+            const upcomingSection = document.getElementById('event-upcoming');
+            const pastSection = document.getElementById('event-past');
+            const upcomingCards = document.getElementById('event-upcoming-cards');
+            const pastCards = document.getElementById('event-past-cards');
+            if (!upcomingSection || !pastSection || !upcomingCards || !pastCards) {
+                failLoud('Events page is missing its event lists.');
+            }
+            if (upcoming.length === 0) {
+                upcomingCards.innerHTML = '<p class="event-empty">Nothing scheduled right now.</p>';
+            } else {
+                upcomingCards.innerHTML = upcoming.map((event) => renderEventCard(event, true)).join('');
+            }
+            upcomingSection.hidden = false;
+            if (past.length === 0) {
+                pastSection.hidden = true;
+                pastCards.innerHTML = '';
+            } else {
+                pastCards.innerHTML = past.map((event) => renderEventCard(event, false)).join('');
+                pastSection.hidden = false;
+            }
+        }
+    }
+
+    const page = document.body.dataset.page;
+    if (!page) {
+        failLoud('Page is missing data-page.');
+    }
+    if (page === 'home' || page === 'events') {
+        renderEvents(page);
+    }
+
     const navToggle = document.querySelector('.nav-toggle');
     const navLinks = document.querySelector('.nav-links');
     if (!navToggle || !navLinks) {
@@ -45,17 +229,40 @@
         });
     });
 
+    if (page === 'media') {
+        const videos = document.querySelectorAll('video.media-video');
+        const photos = document.querySelectorAll('.media-gallery img');
+        if (videos.length !== 19) {
+            failLoud('Media page expected 19 videos, found ' + videos.length + '.');
+        }
+        if (photos.length !== 11) {
+            failLoud('Media page expected 11 photos, found ' + photos.length + '.');
+        }
+        videos.forEach((video) => {
+            const source = video.querySelector('source');
+            if (!source || !source.getAttribute('src')) {
+                failLoud('A media video is missing its source.');
+            }
+            if (!video.getAttribute('poster')) {
+                failLoud('A media video is missing its poster.');
+            }
+            video.addEventListener('error', () => {
+                failLoud('Failed to load video: ' + source.getAttribute('src'));
+            });
+        });
+    }
+
     const galleryImages = document.querySelectorAll('.car-gallery img');
     if (document.querySelector('.car-gallery') && galleryImages.length !== 15) {
         failLoud('Cars gallery expected 15 photos, found ' + galleryImages.length + '.');
     }
 
-    const flyer = document.querySelector('.event-flyer img');
-    if (document.querySelector('.event-flyer') && !flyer) {
-        failLoud('Event flyer image is missing.');
+    const flyers = document.querySelectorAll('.event-flyer img');
+    if (page === 'events' && flyers.length === 0) {
+        failLoud('Events page rendered no flyers.');
     }
 
-    document.querySelectorAll('.car-gallery img, .event-flyer img').forEach((img) => {
+    document.querySelectorAll('.car-gallery img, .event-flyer img, .media-gallery img').forEach((img) => {
         if (!img.getAttribute('src')) {
             failLoud('An image is missing its src.');
         }

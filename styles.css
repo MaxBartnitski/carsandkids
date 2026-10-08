@@ -724,17 +724,37 @@ main {
     line-height: 1.6;
 }
 
-.event-upcoming {
+.next-event[hidden],
+.event-group[hidden] {
+    display: none !important;
+}
+
+.event-group {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px 48px 80px;
+    width: 100%;
+    padding: 8px 48px 48px;
 }
 
-.event-upcoming h2 {
+.event-group h2 {
     font-size: 28px;
     font-weight: 700;
     margin-bottom: 24px;
+    text-align: center;
+}
+
+.event-group-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    width: 100%;
+    max-width: 860px;
+}
+
+.event-empty {
+    font-size: 18px;
+    color: var(--gray);
     text-align: center;
 }
 
@@ -785,6 +805,15 @@ main {
     font-size: 18px;
     font-weight: 600;
     margin: 0 0 12px;
+}
+
+.event-address {
+    display: block;
+    margin-top: 4px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--gray);
+    line-height: 1.4;
 }
 
 .event-blurb {
@@ -890,8 +919,73 @@ main {
     cursor: pointer;
 }
 
+.media-feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 48px 8px;
+}
+
+.media-feature h2,
+.media-block h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.media-feature video {
+    width: min(420px, 100%);
+    border-radius: 16px;
+    background: var(--black);
+    box-shadow: 0 14px 36px rgba(17, 17, 17, 0.15);
+}
+
+.media-block {
+    padding: 32px 48px 8px;
+}
+
+.media-videos {
+    column-count: 3;
+    column-gap: 16px;
+}
+
+.media-videos video {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: 16px;
+    break-inside: avoid;
+    border-radius: 12px;
+    background: var(--black);
+}
+
+.media-gallery {
+    column-count: 3;
+    column-gap: 16px;
+    padding: 8px 48px 80px;
+}
+
+.media-card {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
+    background: var(--black);
+    box-shadow: 0 8px 22px rgba(17, 17, 17, 0.1);
+}
+
+.media-card .lightbox-trigger img {
+    border-radius: 0;
+}
+
 @media (max-width: 1024px) {
-    .car-gallery {
+    .car-gallery,
+    .media-gallery {
+        column-count: 2;
+    }
+
+    .media-videos {
         column-count: 2;
     }
 }
@@ -921,7 +1015,7 @@ main {
     }
     
     .nav-links.active {
-        max-height: 480px;
+        max-height: 640px;
         padding: 20px;
     }
     
@@ -946,8 +1040,8 @@ main {
         padding: 32px 20px 16px;
     }
 
-    .event-upcoming {
-        padding: 16px 20px 60px;
+    .event-group {
+        padding: 8px 20px 40px;
     }
 
     .event-card {
@@ -956,9 +1050,20 @@ main {
         padding: 20px;
     }
 
-    .car-gallery {
+    .car-gallery,
+    .media-gallery {
         column-count: 1;
         padding: 8px 20px 60px;
+    }
+
+    .media-feature,
+    .media-block {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .media-videos {
+        column-count: 1;
     }
 
     .lightbox {

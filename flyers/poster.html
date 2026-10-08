@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080">
+    <title>Cars & Kids flyer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@500;700;800&family=Yellowtail&display=swap" rel="stylesheet">
+    <script>
+        document.documentElement.dataset.show = (location.hash || '#rmh').replace('#', '');
+    </script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            width: 1080px;
+            height: 1350px;
+            overflow: hidden;
+            background: #12365f;
+        }
+        .poster {
+            display: none;
+            position: relative;
+            width: 1080px;
+            height: 1350px;
+            overflow: hidden;
+            flex-direction: column;
+            background:
+                radial-gradient(900px 420px at 50% 80px, #b7e4ff 0%, rgba(183, 228, 255, 0) 70%),
+                linear-gradient(#3d9fe6 0px, #69c0f2 220px, #b7d7ef 420px, #efe6d4 620px, #d9d3c6 100%);
+            font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+            color: #111;
+        }
+        html[data-show="rmh"] #rmh,
+        html[data-show="maw"] #maw { display: flex; }
+
+        .flag {
+            position: absolute;
+            background-color: #fff;
+            background-image:
+                linear-gradient(45deg, #111 25%, transparent 25%),
+                linear-gradient(-45deg, #111 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #111 75%),
+                linear-gradient(-45deg, transparent 75%, #111 75%);
+            background-size: 36px 36px;
+            background-position: 0 0, 0 18px, 18px -18px, -18px 0;
+            z-index: 4;
+        }
+        .flag-tl { top: 0; left: 0; width: 210px; height: 150px; clip-path: polygon(0 0, 100% 0, 0 100%); }
+        .flag-br { right: 0; bottom: 0; width: 150px; height: 110px; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+
+        .top {
+            position: relative;
+            z-index: 3;
+            padding: 28px 48px 0;
+            text-align: center;
+        }
+        .logo {
+            font-family: Anton, Impact, "Arial Black", sans-serif;
+            font-size: 132px;
+            font-weight: 400;
+            line-height: 0.82;
+            letter-spacing: 1px;
+            font-style: italic;
+            text-align: center;
+        }
+        .logo span {
+            display: inline-block;
+            padding: 0 4px;
+            -webkit-text-stroke: 7px #111;
+            paint-order: stroke fill;
+            text-shadow: 7px 7px 0 #111;
+        }
+        .logo .cars { color: #ff1f2d; }
+        .logo .amp { color: #fff; }
+        .logo .kids { color: #2f6dff; }
+
+        .asides {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: -8px;
+            padding: 0 8px;
+        }
+        .script {
+            font-family: Yellowtail, "Brush Script MT", cursive;
+            font-size: 34px;
+            line-height: 1.05;
+            color: #fff;
+            text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+            text-align: left;
+            max-width: 230px;
+        }
+        .script.right { text-align: right; }
+
+        .brush {
+            margin-top: 6px;
+        }
+        .brush span {
+            display: inline-block;
+            background: #ffe14a;
+            color: #1a1a1a;
+            font-family: Yellowtail, "Brush Script MT", cursive;
+            font-size: 64px;
+            line-height: 1;
+            padding: 2px 28px 8px;
+            transform: rotate(-2deg);
+            border-radius: 40% 46% 42% 48%;
+            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.15);
+        }
+        .when {
+            margin-top: 10px;
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #111;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+        .host {
+            margin-top: 8px;
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+        }
+        .addr {
+            margin-top: 2px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #16324f;
+        }
+
+        .hero {
+            position: relative;
+            height: 390px;
+            margin: 8px 28px 0;
+            z-index: 2;
+        }
+        .hero img {
+            position: absolute;
+            object-fit: cover;
+            border: 5px solid #fff;
+            border-radius: 12px;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+            background: #222;
+        }
+        .hero .left {
+            width: 360px;
+            height: 240px;
+            left: 0;
+            bottom: 18px;
+            transform: rotate(-4deg);
+            object-position: center 42%;
+        }
+        .hero .right {
+            width: 360px;
+            height: 240px;
+            right: 0;
+            bottom: 18px;
+            transform: rotate(4deg);
+            object-position: 28% 42%;
+        }
+        .hero .front {
+            width: 470px;
+            height: 330px;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            z-index: 2;
+            object-position: center 78%;
+        }
+        .burst {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            z-index: 3;
+            width: 168px;
+            height: 168px;
+            border-radius: 50%;
+            background: #ffe14a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-family: Anton, Impact, sans-serif;
+            font-size: 28px;
+            line-height: 0.95;
+            letter-spacing: 0.3px;
+            color: #111;
+            transform: rotate(8deg);
+            box-shadow: 0 8px 0 rgba(0, 0, 0, 0.12);
+            padding: 16px;
+        }
+        .burst i {
+            font-style: normal;
+            color: #2f6dff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 168px 168px;
+            gap: 10px;
+            padding: 14px 28px 0;
+            position: relative;
+            z-index: 2;
+        }
+        .grid img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 3px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .sheet {
+            position: relative;
+            margin-top: 12px;
+            background: #fff;
+            flex: 1;
+            padding: 22px 36px 28px;
+            clip-path: polygon(0 18px, 100% 0, 100% 100%, 0 100%);
+        }
+        .sheet-row {
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+        }
+        .blurb {
+            flex: 1;
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.35;
+            color: #16324f;
+        }
+        .hope {
+            width: 230px;
+            font-family: Yellowtail, "Brush Script MT", cursive;
+            font-size: 40px;
+            line-height: 0.95;
+            color: #16324f;
+            text-align: right;
+        }
+        .hope span { color: #2f6dff; }
+        .icons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
+            list-style: none;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 2px solid #e6e6e6;
+        }
+        .icons li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #222;
+        }
+        .bubble {
+            flex: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: #fff;
+        }
+        .bubble svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .bubble svg.solid {
+            fill: currentColor;
+            stroke: none;
+        }
+        .bubble.red { background: #e11d2e; }
+        .bubble.blue { background: #2f6dff; }
+        .bubble.yellow { background: #f5c400; color: #111; }
+        .bubble.green { background: #16a34a; }
+        .tag {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            color: #16324f;
+        }
+        .tag::before,
+        .tag::after {
+            content: "";
+            display: inline-block;
+            width: 70px;
+            height: 2px;
+            background: #111;
+            vertical-align: middle;
+            margin: 0 12px;
+        }
+    </style>
+</head>
+<body>
+    <article class="poster" id="rmh">
+        <div class="flag flag-tl"></div>
+        <header class="top">
+            <h1 class="logo"><span class="cars">Cars</span> <span class="amp">&amp;</span> <span class="kids">Kids</span></h1>
+            <div class="asides">
+                <p class="script">Amazing Cars.<br>Joyful Moments.</p>
+                <p class="script right">Cars, Smiles &amp;<br>Brighter Days</p>
+            </div>
+            <p class="brush"><span>Saturday</span></p>
+            <p class="when">Nov 7 &bull; 9:30 AM</p>
+            <p class="host">Ronald McDonald House</p>
+            <p class="addr">1300 E 21st Ave, Denver, CO 80205</p>
+        </header>
+        <div class="hero">
+            <img class="left" src="../images/cars/corvette-c8-red.jpg" alt="">
+            <img class="right" src="../images/cars/porsche-911-gt3-blue.jpg" alt="">
+            <img class="front" src="../images/cars/lotus-emira-blue.jpg" alt="">
+            <p class="burst">Kids<br>Inspire Us<br>All! <i>&#9829;</i></p>
+        </div>
+        <div class="grid">
+            <img src="../images/cars/ferrari-360-wash.jpg" alt="" style="object-position:center 45%">
+            <img src="../images/cars/porsche-356-brown.jpg" alt="" style="object-position:center 50%">
+            <img src="../images/cars/caterham-seven-green.jpg" alt="" style="object-position:center 45%">
+            <img src="../images/cars/porsche-911-targa-blue.jpg" alt="" style="object-position:center 50%">
+            <img src="../images/cars/aston-vantage-night.jpg" alt="" style="object-position:center 92%">
+            <img src="../images/cars/porsche-718-boxster-white.jpg" alt="" style="object-position:center 50%">
+        </div>
+        <footer class="sheet">
+            <div class="flag flag-br"></div>
+            <div class="sheet-row">
+                <p class="blurb">A fun, uplifting morning created to bring joy to kids and families through amazing cars, up-close experiences, photos, and special moments together.</p>
+                <p class="hope">Hope, Joy &amp; <span>Brighter Days</span></p>
+            </div>
+            <ul class="icons">
+                <li><span class="bubble red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15h16l-1.5-4.5a2 2 0 0 0-1.9-1.3H7.4a2 2 0 0 0-1.9 1.3L4 15z"/><path d="M6 15v2.2M18 15v2.2"/><circle cx="8" cy="17.2" r="1.4" fill="currentColor" stroke="none"/><circle cx="16" cy="17.2" r="1.4" fill="currentColor" stroke="none"/><path d="M7 9.2 8.2 6.5h7.6L17 9.2"/></svg></span>Sports &amp; classic cars</li>
+                <li><span class="bubble blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h8l1.2 2H20a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8a1 1 0 0 1 1-1h2.8L8 7z"/><circle cx="12" cy="13" r="2.6"/></svg></span>Photo opportunities</li>
+                <li><span class="bubble yellow"><svg class="solid" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.2" cy="7.2" r="2.3"/><circle cx="15.6" cy="8" r="1.9"/><path d="M3.6 18.8c.35-3.1 2.3-4.7 4.8-4.7 2.4 0 4.3 1.5 4.8 4.7H3.6z"/><path d="M12.6 18.8c.25-2.3 1.7-3.6 3.5-3.6 1.7 0 3.1 1.1 3.5 3.6h-7z"/></svg></span>Up-close viewing</li>
+                <li><span class="bubble green"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M8.5 10.2h.01M15.5 10.2h.01"/><path d="M8.2 14.2c.9 1.4 2.2 2 3.8 2s2.9-.6 3.8-2"/></svg></span>Kids &amp; families</li>
+            </ul>
+            <p class="tag">Cars bring people together</p>
+        </footer>
+    </article>
+
+    <article class="poster" id="maw">
+        <div class="flag flag-tl"></div>
+        <header class="top">
+            <h1 class="logo"><span class="cars">Cars</span> <span class="amp">&amp;</span> <span class="kids">Kids</span></h1>
+            <div class="asides">
+                <p class="script">Amazing Cars.<br>Joyful Moments.</p>
+                <p class="script right">Cars, Smiles &amp;<br>Brighter Days</p>
+            </div>
+            <p class="brush"><span>Thursday</span></p>
+            <p class="when">Oct 29 &bull; 4:30 PM</p>
+            <p class="host">Make-A-Wish</p>
+            <p class="addr">7951 E Maplewood Ave #126, Greenwood Village, CO 80111</p>
+        </header>
+        <div class="hero">
+            <img class="left" src="../images/cars/corvette-c8-red.jpg" alt="">
+            <img class="right" src="../images/cars/porsche-911-gt3-blue.jpg" alt="">
+            <img class="front" src="../images/cars/lotus-emira-blue.jpg" alt="">
+            <p class="burst">Kids<br>Inspire Us<br>All! <i>&#9829;</i></p>
+        </div>
+        <div class="grid">
+            <img src="../images/cars/ferrari-360-wash.jpg" alt="" style="object-position:center 45%">
+            <img src="../images/cars/porsche-356-brown.jpg" alt="" style="object-position:center 50%">
+            <img src="../images/cars/caterham-seven-green.jpg" alt="" style="object-position:center 45%">
+            <img src="../images/cars/porsche-911-targa-blue.jpg" alt="" style="object-position:center 50%">
+            <img src="../images/cars/aston-vantage-night.jpg" alt="" style="object-position:center 92%">
+            <img src="../images/cars/porsche-718-boxster-white.jpg" alt="" style="object-position:center 50%">
+        </div>
+        <footer class="sheet">
+            <div class="flag flag-br"></div>
+            <div class="sheet-row">
+                <p class="blurb">A fun, uplifting afternoon created to bring joy to kids and families through amazing cars, up-close experiences, photos, and special moments together.</p>
+                <p class="hope">Hope, Joy &amp; <span>Brighter Days</span></p>
+            </div>
+            <ul class="icons">
+                <li><span class="bubble red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15h16l-1.5-4.5a2 2 0 0 0-1.9-1.3H7.4a2 2 0 0 0-1.9 1.3L4 15z"/><path d="M6 15v2.2M18 15v2.2"/><circle cx="8" cy="17.2" r="1.4" fill="currentColor" stroke="none"/><circle cx="16" cy="17.2" r="1.4" fill="currentColor" stroke="none"/><path d="M7 9.2 8.2 6.5h7.6L17 9.2"/></svg></span>Sports &amp; classic cars</li>
+                <li><span class="bubble blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h8l1.2 2H20a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8a1 1 0 0 1 1-1h2.8L8 7z"/><circle cx="12" cy="13" r="2.6"/></svg></span>Photo opportunities</li>
+                <li><span class="bubble yellow"><svg class="solid" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.2" cy="7.2" r="2.3"/><circle cx="15.6" cy="8" r="1.9"/><path d="M3.6 18.8c.35-3.1 2.3-4.7 4.8-4.7 2.4 0 4.3 1.5 4.8 4.7H3.6z"/><path d="M12.6 18.8c.25-2.3 1.7-3.6 3.5-3.6 1.7 0 3.1 1.1 3.5 3.6h-7z"/></svg></span>Up-close viewing</li>
+                <li><span class="bubble green"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M8.5 10.2h.01M15.5 10.2h.01"/><path d="M8.2 14.2c.9 1.4 2.2 2 3.8 2s2.9-.6 3.8-2"/></svg></span>Kids &amp; families</li>
+            </ul>
+            <p class="tag">Cars bring people together</p>
+        </footer>
+    </article>
+</body>
+</html>

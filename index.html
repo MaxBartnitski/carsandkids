@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="forms-config.js"></script>
 </head>
-<body>
+<body data-page="home" data-asset-prefix="">
     <nav class="nav">
         <a href="/" class="nav-logo">Cars <span>&</span> Kids</a>
         <button class="nav-toggle" aria-label="Toggle menu">
@@ -30,6 +30,7 @@
         </button>
         <div class="nav-links">
             <a href="/events/">Events</a>
+            <a href="/media/">Media</a>
             <a href="/cars/">Cars</a>
             <a href="#about">What We Do</a>
             <a href="#get-involved">Get Involved</a>
@@ -50,12 +51,12 @@
             </div>
         </section>
 
-        <section class="next-event">
+        <section class="next-event" id="next-event" hidden>
             <div class="next-event-copy">
-                <div class="next-event-label">Next event</div>
-                <p class="next-event-details">Saturday, Sept 12 · 9:30 AM–12:00 PM · Brent's Place</p>
+                <div class="next-event-label" id="next-event-label">Next event</div>
+                <p class="next-event-details" id="next-event-details"></p>
             </div>
-            <a href="/events/" class="btn-primary">Event details</a>
+            <a href="/events/" class="btn-primary" id="next-event-link">Event details</a>
         </section>
 
         <!-- Photo Grid -->
@@ -361,6 +362,7 @@
         </div>
     </div>
 
+    <script src="events.js"></script>
     <script src="site.js"></script>
     <script>
         // Modal functions
