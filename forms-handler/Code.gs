@@ -20,6 +20,7 @@ var CONFIG = {
   VOLUNTEER_LABEL: 'Volunteers',
   // Old names still count as already-in-CRM so we do not send a second welcome.
   LEGACY_VOLUNTEER_LABELS: ['Volunteer', 'VOLUNTEERS'],
+  WHATSAPP_LABEL: 'WhatsApp',
   EVENT_TITLE_TAG: '[Cars & Kids]',
   CALENDAR_LOOKAHEAD_MONTHS: 18,
   // Editor tests skip live calendar invites unless you set this true on purpose.
@@ -1216,6 +1217,167 @@ function sendBackfillReport_(report) {
   });
 }
 
+/**
+ * Editor-only. Emails info@ every Google Contact that is not in the WhatsApp label.
+ * Fails if that label does not exist. Does not send mail to the contacts.
+ */
+function emailContactsWithoutWhatsAppLabel() {
+  checkAdvancedServices();
+  var groups = listContactGroups_();
+  var whatsapp = findContactGroupByName_(groups, CONFIG.WHATSAPP_LABEL);
+  if (!whatsapp || !whatsapp.resourceName) {
+    var names = groups
+      .filter(function (g) { return g.name; })
+      .map(function (g) { return g.name + ' (' + (g.memberCount || 0) + ')'; });
+    throw new Error(
+      'Google Contacts has no "' + CONFIG.WHATSAPP_LABEL + '" label. Existing labels: ' +
+      (names.length ? names.join(', ') : '(none)')
+    );
+  }
+
+  var volunteerNames = volunteerGroupResourceNamesFrom_(groups);
+  var people = listAllConnections_();
+  if (!people.length) {
+    throw new Error('People API returned no Google Contacts.');
+  }
+
+  var volunteers = [];
+  var others = [];
+  var noEmail = [];
+  var onWhatsApp = 0;
+  var i;
+  for (i = 0; i < people.length; i++) {
+    var person = people[i];
+    if (personInGroup_(person, whatsapp.resourceName)) {
+      onWhatsApp += 1;
+      continue;
+    }
+    var row = formatContactRow_(person);
+    if (!row.emails.length) {
+      noEmail.push(row.name + (row.phones.length ? ' — ' + row.phones.join(', ') : ''));
+      continue;
+    }
+    if (personIsInAnyGroup_(person, volunteerNames)) {
+      volunteers.push(row);
+    } else {
+      others.push(row);
+    }
+  }
+
+  var lines = [
+    'Google Contacts without the ' + CONFIG.WHATSAPP_LABEL + ' label',
+    '',
+    'WhatsApp labeled: ' + onWhatsApp,
+    'Volunteers without WhatsApp (have email): ' + volunteers.length,
+    'Other contacts without WhatsApp (have email): ' + others.length,
+    'Without WhatsApp and no email: ' + noEmail.length,
+    '',
+    'BCC — Volunteers without WhatsApp:',
+    volunteers.length ? uniqueEmails_(volunteers).join(', ') : '(none)',
+  ];
+  if (others.length) {
+    lines.push('', 'BCC — other contacts without WhatsApp:', uniqueEmails_(others).join(', '));
+  }
+  if (volunteers.length) {
+    lines.push('', 'Volunteers without WhatsApp:');
+    volunteers.forEach(function (row) {
+      lines.push('- ' + row.name + ' <' + row.emails.join(', ') + '>');
+    });
+  }
+  if (others.length) {
+    lines.push('', 'Other contacts without WhatsApp:');
+    others.forEach(function (row) {
+      lines.push('- ' + row.name + ' <' + row.emails.join(', ') + '>');
+    });
+  }
+  if (noEmail.length) {
+    lines.push('', 'No email (not included in BCC):');
+    noEmail.forEach(function (item) {
+      lines.push('- ' + item);
+    });
+  }
+
+  var subject = '[Cars & Kids] CONTACTS WITHOUT WHATSAPP — ' +
+    (volunteers.length + others.length) + ' with email';
+  GmailApp.sendEmail(CONFIG.NOTIFY_EMAIL, subject, lines.join('\n'), {
+    name: CONFIG.FROM_NAME,
+  });
+  Logger.log(lines.join('\n'));
+}
+
+function volunteerGroupResourceNamesFrom_(groups) {
+  var names = [CONFIG.VOLUNTEER_LABEL].concat(CONFIG.LEGACY_VOLUNTEER_LABELS || []);
+  var resourceNames = [];
+  var i;
+  for (i = 0; i < names.length; i++) {
+    var group = findContactGroupByName_(groups, names[i]);
+    if (group && group.resourceName) {
+      resourceNames.push(group.resourceName);
+    }
+  }
+  return resourceNames;
+}
+
+function listAllConnections_() {
+  assertPeopleApi_();
+  var fields = 'names,emailAddresses,phoneNumbers,memberships,metadata';
+  var people = [];
+  var pageToken;
+  do {
+    var conn = People.People.Connections.list('people/me', {
+      personFields: fields,
+      pageSize: 200,
+      pageToken: pageToken,
+    });
+    var batch = (conn && conn.connections) || [];
+    var i;
+    for (i = 0; i < batch.length; i++) {
+      people.push(batch[i]);
+    }
+    pageToken = conn && conn.nextPageToken;
+  } while (pageToken);
+  return people;
+}
+
+function formatContactRow_(person) {
+  var names = (person && person.names) || [];
+  var name = '';
+  var i;
+  for (i = 0; i < names.length; i++) {
+    if (names[i].displayName) {
+      name = names[i].displayName;
+      break;
+    }
+  }
+  var emails = [];
+  var addresses = (person && person.emailAddresses) || [];
+  for (i = 0; i < addresses.length; i++) {
+    if (addresses[i].value) emails.push(addresses[i].value);
+  }
+  var phones = [];
+  var numbers = (person && person.phoneNumbers) || [];
+  for (i = 0; i < numbers.length; i++) {
+    if (numbers[i].value) phones.push(numbers[i].value);
+  }
+  return { name: name || '(no name)', emails: emails, phones: phones };
+}
+
+function uniqueEmails_(rows) {
+  var seen = {};
+  var out = [];
+  var i;
+  var j;
+  for (i = 0; i < rows.length; i++) {
+    for (j = 0; j < rows[i].emails.length; j++) {
+      var email = rows[i].emails[j].toLowerCase();
+      if (seen[email]) continue;
+      seen[email] = true;
+      out.push(rows[i].emails[j]);
+    }
+  }
+  return out;
+}
+
 function loadContactsByEmail_() {
   assertPeopleApi_();
   var fields = 'names,emailAddresses,phoneNumbers,biographies,memberships,metadata';
@@ -1245,17 +1407,7 @@ function loadContactsByEmail_() {
 }
 
 function volunteerGroupResourceNames_() {
-  var groups = listContactGroups_();
-  var names = [CONFIG.VOLUNTEER_LABEL].concat(CONFIG.LEGACY_VOLUNTEER_LABELS || []);
-  var resourceNames = [];
-  var i;
-  for (i = 0; i < names.length; i++) {
-    var group = findContactGroupByName_(groups, names[i]);
-    if (group && group.resourceName) {
-      resourceNames.push(group.resourceName);
-    }
-  }
-  return resourceNames;
+  return volunteerGroupResourceNamesFrom_(listContactGroups_());
 }
 
 function personIsInAnyGroup_(person, groupResourceNames) {
