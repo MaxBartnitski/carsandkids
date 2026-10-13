@@ -8,11 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@500;700;800&family=Yellowtail&display=swap" rel="stylesheet">
     <script>
-        function showPoster() {
-            document.documentElement.dataset.show = (location.hash || '#rmh').replace('#', '');
-        }
-        showPoster();
-        window.addEventListener('hashchange', showPoster);
+        document.documentElement.dataset.show = (location.hash || '#rmh').replace('#', '');
     </script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -120,17 +116,19 @@
             color: #111;
             text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
         }
-        .charity {
+        .host {
             margin-top: 8px;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 800;
             color: #fff;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
         }
-        .kicker,
-        .event-name,
-        .treat,
-        .families { display: none; }
+        .addr {
+            margin-top: 2px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #16324f;
+        }
 
         .hero {
             position: relative;
@@ -306,86 +304,6 @@
             vertical-align: middle;
             margin: 0 12px;
         }
-
-        .halloween {
-            background:
-                radial-gradient(820px 380px at 50% 30px, rgba(255, 186, 48, 0.55), rgba(255, 186, 48, 0) 68%),
-                linear-gradient(#241042 0px, #5c2784 170px, #e25a12 360px, #f6d7a4 560px, #f8f3ea 100%);
-            color: #111;
-        }
-        .halloween .flag {
-            background-color: #ff8a1e;
-            background-image:
-                linear-gradient(45deg, #111 25%, transparent 25%),
-                linear-gradient(-45deg, #111 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #111 75%),
-                linear-gradient(-45deg, transparent 75%, #111 75%);
-        }
-        .halloween .top { padding-top: 20px; }
-        .halloween .logo { font-size: 104px; }
-        .halloween .asides,
-        .halloween .brush { display: none; }
-        .halloween .kicker,
-        .halloween .event-name,
-        .halloween .treat,
-        .halloween .families { display: block; }
-        .halloween .kicker {
-            margin-top: 0;
-            font-family: Anton, Impact, "Arial Black", sans-serif;
-            font-size: 32px;
-            letter-spacing: 0.16em;
-            color: #fff;
-            text-shadow: 0 3px 0 #111;
-        }
-        .halloween .event-name {
-            margin-top: 2px;
-            font-family: Anton, Impact, "Arial Black", sans-serif;
-            font-size: 84px;
-            line-height: 0.86;
-            letter-spacing: 0.5px;
-            color: #ffc107;
-            -webkit-text-stroke: 6px #111;
-            paint-order: stroke fill;
-            text-shadow: 6px 6px 0 #111;
-        }
-        .halloween .when {
-            margin-top: 8px;
-            color: #fff;
-            text-shadow: 0 2px 0 #111;
-        }
-        .halloween .treat {
-            margin-top: 6px;
-            font-size: 26px;
-            font-weight: 800;
-            color: #fff;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
-        }
-        .halloween .families {
-            width: fit-content;
-            margin: 10px auto 0;
-            padding: 7px 18px 8px;
-            border-radius: 999px;
-            background: #111;
-            color: #fff;
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: 0.01em;
-        }
-        .halloween .charity {
-            margin-top: 8px;
-            color: #ffe14a;
-            font-size: 26px;
-            text-shadow: 0 2px 0 #111;
-        }
-        .halloween .hero { height: 332px; margin-top: 10px; }
-        .halloween .hero .front { height: 292px; }
-        .halloween .hero .left,
-        .halloween .hero .right { height: 214px; bottom: 8px; }
-        .halloween .grid { grid-template-rows: 164px 164px; padding-top: 12px; }
-        .halloween .sheet { padding-top: 18px; padding-bottom: 20px; }
-        .halloween .sheet { background: #fffaf3; }
-        .halloween .hope span { color: #e25a12; }
-        .halloween .burst { background: #ff8a1e; }
     </style>
 </head>
 <body>
@@ -399,21 +317,22 @@
             </div>
             <p class="brush"><span>Saturday</span></p>
             <p class="when">Nov 7 &bull; 9:30 AM</p>
-            <p class="charity">Charity we're serving: Ronald McDonald House</p>
+            <p class="host">Ronald McDonald House</p>
+            <p class="addr">1300 E 21st Ave, Denver, CO 80205</p>
         </header>
         <div class="hero">
-            <img class="left" src="../images/cars/corvette-c8-red.jpg" alt="Red Chevrolet Corvette">
-            <img class="right" src="../images/cars/porsche-911-gt3-blue.jpg" alt="Turquoise Porsche 911 GT3">
-            <img class="front" src="../images/media/photos/img-3171.jpg" alt="Child giving a thumbs-up from a red convertible" style="object-position:62% 42%">
+            <img class="left" src="../images/cars/corvette-c8-red.jpg" alt="">
+            <img class="right" src="../images/cars/porsche-911-gt3-blue.jpg" alt="">
+            <img class="front" src="../images/cars/lotus-emira-blue.jpg" alt="">
             <p class="burst">Kids<br>Inspire Us<br>All! <i>&#9829;</i></p>
         </div>
         <div class="grid">
-            <img src="../images/media/photos/img-3184.jpg" alt="Child sitting in a red Corvette" style="object-position:center 36%">
-            <img src="../images/cars/lotus-emira-blue.jpg" alt="Blue Lotus Emira" style="object-position:center 72%">
-            <img src="../images/media/photos/img-3153.jpg" alt="Children at the wheel of a blue Lotus" style="object-position:center 48%">
-            <img src="../images/cars/porsche-356-brown.jpg" alt="Brown Porsche 356" style="object-position:center 50%">
-            <img src="../images/cars/caterham-seven-green.jpg" alt="Green Caterham Seven" style="object-position:center 45%">
-            <img src="../images/media/photos/img-3206.jpg" alt="Child at the wheel of a blue sports car" style="object-position:42% 46%">
+            <img src="../images/cars/ferrari-360-wash.jpg" alt="" style="object-position:center 45%">
+            <img src="../images/cars/porsche-356-brown.jpg" alt="" style="object-position:center 50%">
+            <img src="../images/cars/caterham-seven-green.jpg" alt="" style="object-position:center 45%">
+            <img src="../images/cars/porsche-911-targa-blue.jpg" alt="" style="object-position:center 50%">
+            <img src="../images/cars/aston-vantage-night.jpg" alt="" style="object-position:center 92%">
+            <img src="../images/cars/porsche-718-boxster-white.jpg" alt="" style="object-position:center 50%">
         </div>
         <footer class="sheet">
             <div class="flag flag-br"></div>
@@ -431,41 +350,43 @@
         </footer>
     </article>
 
-    <article class="poster halloween" id="maw">
+    <article class="poster" id="maw">
         <div class="flag flag-tl"></div>
         <header class="top">
             <h1 class="logo"><span class="cars">Cars</span> <span class="amp">&amp;</span> <span class="kids">Kids</span></h1>
-            <p class="kicker">Make-A-Wish</p>
-            <h2 class="event-name">Trunk or Treat</h2>
-            <p class="when">Thursday, Oct 29 &bull; 4:30 PM</p>
-            <p class="treat">We'll be in costume, giving out candy.</p>
-            <p class="families">About 100 families are expected to attend.</p>
-            <p class="charity">Charity we're serving: Make-A-Wish</p>
+            <div class="asides">
+                <p class="script">Amazing Cars.<br>Joyful Moments.</p>
+                <p class="script right">Cars, Smiles &amp;<br>Brighter Days</p>
+            </div>
+            <p class="brush"><span>Thursday</span></p>
+            <p class="when">Oct 29 &bull; 4:30 PM</p>
+            <p class="host">Make-A-Wish</p>
+            <p class="addr">7951 E Maplewood Ave #126, Greenwood Village, CO 80111</p>
         </header>
         <div class="hero">
-            <img class="left" src="../images/cars/lotus-emira-blue.jpg" alt="Blue Lotus Emira with the doors open" style="object-position:center 70%">
-            <img class="right" src="../images/cars/porsche-911-gt3-blue.jpg" alt="Turquoise Porsche 911 GT3">
-            <img class="front" src="../images/media/photos/img-3184.jpg" alt="Child in a pink cap sitting in a red Corvette" style="object-position:center 40%">
-            <p class="burst">Candy<br>&amp;<br>Costumes</p>
+            <img class="left" src="../images/cars/corvette-c8-red.jpg" alt="">
+            <img class="right" src="../images/cars/porsche-911-gt3-blue.jpg" alt="">
+            <img class="front" src="../images/cars/lotus-emira-blue.jpg" alt="">
+            <p class="burst">Kids<br>Inspire Us<br>All! <i>&#9829;</i></p>
         </div>
         <div class="grid">
-            <img src="../images/media/photos/img-3171.jpg" alt="Child giving a thumbs-up from a red convertible" style="object-position:62% 40%">
-            <img src="../images/cars/corvette-c8-red.jpg" alt="Red Chevrolet Corvette" style="object-position:center 42%">
-            <img src="../images/media/photos/img-3153.jpg" alt="Children at the wheel of a blue Lotus" style="object-position:center 46%">
-            <img src="../images/cars/ferrari-360-wash.jpg" alt="Red Ferrari 360 Spider" style="object-position:center 45%">
-            <img src="../images/media/photos/img-3178.jpg" alt="Child standing in front of a red Corvette" style="object-position:center 28%">
-            <img src="../images/cars/porsche-718-boxster-white.jpg" alt="White Porsche 718 Boxster" style="object-position:center 50%">
+            <img src="../images/cars/ferrari-360-wash.jpg" alt="" style="object-position:center 45%">
+            <img src="../images/cars/porsche-356-brown.jpg" alt="" style="object-position:center 50%">
+            <img src="../images/cars/caterham-seven-green.jpg" alt="" style="object-position:center 45%">
+            <img src="../images/cars/porsche-911-targa-blue.jpg" alt="" style="object-position:center 50%">
+            <img src="../images/cars/aston-vantage-night.jpg" alt="" style="object-position:center 92%">
+            <img src="../images/cars/porsche-718-boxster-white.jpg" alt="" style="object-position:center 50%">
         </div>
         <footer class="sheet">
             <div class="flag flag-br"></div>
             <div class="sheet-row">
-                <p class="blurb">Trunk or treat with kids and families. Come see the cars, take photos, and pick up candy from people in costume.</p>
-                <p class="hope">Candy, Cars &amp; <span>Bright Smiles</span></p>
+                <p class="blurb">A fun, uplifting afternoon created to bring joy to kids and families through amazing cars, up-close experiences, photos, and special moments together.</p>
+                <p class="hope">Hope, Joy &amp; <span>Brighter Days</span></p>
             </div>
             <ul class="icons">
                 <li><span class="bubble red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15h16l-1.5-4.5a2 2 0 0 0-1.9-1.3H7.4a2 2 0 0 0-1.9 1.3L4 15z"/><path d="M6 15v2.2M18 15v2.2"/><circle cx="8" cy="17.2" r="1.4" fill="currentColor" stroke="none"/><circle cx="16" cy="17.2" r="1.4" fill="currentColor" stroke="none"/><path d="M7 9.2 8.2 6.5h7.6L17 9.2"/></svg></span>Sports &amp; classic cars</li>
-                <li><span class="bubble yellow"><svg class="solid" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 12 3.2 8.1v7.8L9.1 12z"/><path d="M14.9 12 20.8 8.1v7.8L14.9 12z"/><ellipse cx="12" cy="12" rx="4.3" ry="3.4"/></svg></span>Candy &amp; costumes</li>
                 <li><span class="bubble blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h8l1.2 2H20a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8a1 1 0 0 1 1-1h2.8L8 7z"/><circle cx="12" cy="13" r="2.6"/></svg></span>Photo opportunities</li>
+                <li><span class="bubble yellow"><svg class="solid" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.2" cy="7.2" r="2.3"/><circle cx="15.6" cy="8" r="1.9"/><path d="M3.6 18.8c.35-3.1 2.3-4.7 4.8-4.7 2.4 0 4.3 1.5 4.8 4.7H3.6z"/><path d="M12.6 18.8c.25-2.3 1.7-3.6 3.5-3.6 1.7 0 3.1 1.1 3.5 3.6h-7z"/></svg></span>Up-close viewing</li>
                 <li><span class="bubble green"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M8.5 10.2h.01M15.5 10.2h.01"/><path d="M8.2 14.2c.9 1.4 2.2 2 3.8 2s2.9-.6 3.8-2"/></svg></span>Kids &amp; families</li>
             </ul>
             <p class="tag">Cars bring people together</p>

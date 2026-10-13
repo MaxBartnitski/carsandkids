@@ -18,10 +18,9 @@ window.CARS_AND_KIDS_EVENTS = [
         start: '2026-10-29T16:30:00-06:00',
         pastAt: '2026-10-30T00:00:00-06:00',
         location: 'Make-A-Wish',
-        address: '7951 E Maplewood Ave #126, Greenwood Village, CO 80111',
         blurb: 'Trunk or treat with kids and families. People will be in costume, giving out candy, with amazing cars, up-close visits, and photos.',
         flyer: 'images/events/2026-10-29-make-a-wish-flyer.jpg',
-        flyerAlt: "Cars & Kids flyer for Make-A-Wish Trunk or Treat, Thursday, October 29, 4:30 PM. Costumes and candy. About 100 families are expected to attend. Charity we're serving: Make-A-Wish.",
+        flyerAlt: 'Cars & Kids flyer for Thursday, October 29, 4:30 PM at Make-A-Wish',
     },
     {
         id: 'ronald-mcdonald-house-2026-11-07',
@@ -29,9 +28,8 @@ window.CARS_AND_KIDS_EVENTS = [
         start: '2026-11-07T09:30:00-07:00',
         pastAt: '2026-11-08T00:00:00-07:00',
         location: 'Ronald McDonald House',
-        address: '1300 E 21st Ave, Denver, CO 80205',
         blurb: 'A morning with kids and families at Ronald McDonald House — amazing cars, up-close experiences, photos, and special moments together.',
         flyer: 'images/events/2026-11-07-ronald-mcdonald-house-flyer.jpg',
-        flyerAlt: "Cars & Kids flyer for Saturday, November 7, 9:30 AM. Charity we're serving: Ronald McDonald House.",
+        flyerAlt: 'Cars & Kids flyer for Saturday, November 7, 9:30 AM at Ronald McDonald House',
     },
 ];
