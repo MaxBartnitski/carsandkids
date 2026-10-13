@@ -20,7 +20,7 @@ window.CARS_AND_KIDS_EVENTS = [
         pastAt: '2026-10-29T19:30:00-06:00',
         location: 'Make-A-Wish',
         blurb: 'Trunk or treat with kids and families. People will be in costume, giving out candy, with amazing cars, up-close visits, and photos.',
-        flyer: 'images/events/2026-10-29-make-a-wish-flyer.png',
+        flyer: 'images/events/2026-10-29-make-a-wish-flyer.jpg',
         flyerAlt: 'Cars & Kids flyer for Make-A-Wish Trunk or Treat, Thursday, October 29, 5:30 PM to 7:30 PM. Benefiting Make-A-Wish.',
     },
     {
@@ -31,7 +31,7 @@ window.CARS_AND_KIDS_EVENTS = [
         pastAt: '2026-11-07T12:00:00-07:00',
         location: 'Ronald McDonald House',
         blurb: 'A morning with kids and families at Ronald McDonald House — amazing cars, up-close experiences, photos, and special moments together.',
-        flyer: 'images/events/2026-11-07-ronald-mcdonald-house-flyer.png',
+        flyer: 'images/events/2026-11-07-ronald-mcdonald-house-flyer.jpg',
         flyerAlt: 'Cars & Kids flyer for Saturday, November 7, 10:00 AM to 12:00 PM. Benefiting Ronald McDonald House.',
     },
 ];
