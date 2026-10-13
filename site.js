@@ -123,7 +123,7 @@
             '<dl class="event-meta">',
             '<dt>Date</dt><dd>' + escapeHtml(formatLongDate(event.start)) + '</dd>',
             '<dt>Time</dt><dd>' + escapeHtml(formatTimeRange(event)) + '</dd>',
-            '<dt>Charity</dt><dd>' + escapeHtml("Charity we're serving: " + event.location) + '</dd>',
+            '<dt>Benefiting</dt><dd>' + escapeHtml(event.location) + '</dd>',
             '</dl>',
             '<p class="event-blurb">' + escapeHtml(event.blurb) + '</p>',
             cta,
@@ -154,7 +154,7 @@
                 link.textContent = 'See events';
             } else {
                 label.textContent = 'Next event';
-                details.textContent = formatShortDate(next.start) + ' · ' + formatTimeRange(next) + ' · ' + next.location;
+                details.textContent = formatShortDate(next.start) + ' · ' + formatTimeRange(next) + ' · Benefiting ' + next.location;
                 link.textContent = 'Event details';
             }
             link.href = '/events/';
