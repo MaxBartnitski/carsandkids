@@ -114,9 +114,6 @@
     }
 
     function renderEventCard(event, isUpcoming) {
-        const address = event.address
-            ? '<span class="event-address">' + escapeHtml(event.address) + '</span>'
-            : '';
         const cta = isUpcoming
             ? '<a href="/#get-involved" class="btn-primary event-card-cta">Bring your car</a>'
             : '';
@@ -126,7 +123,7 @@
             '<dl class="event-meta">',
             '<dt>Date</dt><dd>' + escapeHtml(formatLongDate(event.start)) + '</dd>',
             '<dt>Time</dt><dd>' + escapeHtml(formatTimeRange(event)) + '</dd>',
-            '<dt>Location</dt><dd>' + escapeHtml(event.location) + address + '</dd>',
+            '<dt>Benefiting</dt><dd>' + escapeHtml(event.location) + '</dd>',
             '</dl>',
             '<p class="event-blurb">' + escapeHtml(event.blurb) + '</p>',
             cta,
@@ -157,7 +154,7 @@
                 link.textContent = 'See events';
             } else {
                 label.textContent = 'Next event';
-                details.textContent = formatShortDate(next.start) + ' · ' + formatTimeRange(next) + ' · ' + next.location;
+                details.textContent = formatShortDate(next.start) + ' · ' + formatTimeRange(next) + ' · Benefiting ' + next.location;
                 link.textContent = 'Event details';
             }
             link.href = '/events/';
@@ -253,8 +250,8 @@
     }
 
     const galleryImages = document.querySelectorAll('.car-gallery img');
-    if (document.querySelector('.car-gallery') && galleryImages.length !== 15) {
-        failLoud('Cars gallery expected 15 photos, found ' + galleryImages.length + '.');
+    if (document.querySelector('.car-gallery') && galleryImages.length !== 16) {
+        failLoud('Cars gallery expected 16 photos, found ' + galleryImages.length + '.');
     }
 
     const flyers = document.querySelectorAll('.event-flyer img');
