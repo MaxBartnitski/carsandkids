@@ -430,12 +430,20 @@
 
             try {
                 const endpoint = getFormsEndpoint();
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload),
-                });
+                let response;
+                try {
+                    response = await fetch(endpoint, {
+                        method: 'POST',
+                        redirect: 'follow',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload),
+                    });
+                } catch (networkErr) {
+                    // The request was sent, but the browser never got the reply
+                    // (connection dropped, or an extension blocked Google's
+                    // response host). The form server usually still saved it.
+                    throw new Error("We sent your form but couldn't confirm it arrived. It most likely went through, so please don't submit again. If you don't hear from us in a couple of days, email info@carsandkids.net.");
+                }
 
                 let result;
                 try {
