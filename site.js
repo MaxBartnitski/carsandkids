@@ -102,6 +102,51 @@
         return { upcoming, past };
     }
 
+    function loadMedia(events) {
+        const media = window.CARS_AND_KIDS_MEDIA;
+        if (!media || typeof media !== 'object') {
+            failLoud('Media list is missing.');
+        }
+        const eventIds = new Set(events.map((event) => event.id));
+        Object.keys(media).forEach((id) => {
+            if (!eventIds.has(id)) {
+                failLoud('Media is filed under an unknown event id: ' + id);
+            }
+            const entry = media[id];
+            if (!Array.isArray(entry.photos) || !Array.isArray(entry.videos)) {
+                failLoud('Media for ' + id + ' needs photos and videos lists.');
+            }
+            entry.photos.forEach((photo) => {
+                ['src', 'alt'].forEach((key) => {
+                    if (typeof photo[key] !== 'string' || photo[key].trim() === '') {
+                        failLoud('A photo for ' + id + ' is missing ' + key + '.');
+                    }
+                });
+                if (!Number.isInteger(photo.width) || !Number.isInteger(photo.height)) {
+                    failLoud('Photo ' + photo.src + ' is missing its width and height.');
+                }
+            });
+            entry.videos.forEach((video) => {
+                ['src', 'poster', 'alt'].forEach((key) => {
+                    if (typeof video[key] !== 'string' || video[key].trim() === '') {
+                        failLoud('A video for ' + id + ' is missing ' + key + '.');
+                    }
+                });
+                if (typeof video.seconds !== 'number' || !(video.seconds > 0)) {
+                    failLoud('Video ' + video.src + ' is missing its length in seconds.');
+                }
+                if (video.livePhoto === true && video.seconds > 3.5) {
+                    failLoud('Video ' + video.src + ' is marked as a Live Photo clip but runs ' + video.seconds + 's.');
+                }
+            });
+        });
+        return media;
+    }
+
+    function shownVideos(entry) {
+        return entry.videos.filter((video) => video.livePhoto !== true);
+    }
+
     function assetUrl(path) {
         const prefix = document.body.dataset.assetPrefix;
         if (prefix === undefined) {
@@ -113,10 +158,15 @@
         return prefix + '/' + path;
     }
 
-    function renderEventCard(event, isUpcoming) {
-        const cta = isUpcoming
-            ? '<a href="/#get-involved" class="btn-primary event-card-cta">Bring your car</a>'
-            : '';
+    function renderEventCard(event, isUpcoming, media) {
+        const gallery = media[event.id];
+        let cta = '';
+        if (gallery && gallery.photos.length > 0) {
+            const count = gallery.photos.length + shownVideos(gallery).length;
+            cta = '<a href="/media/#' + escapeHtml(event.id) + '" class="btn-primary event-card-cta">See photos (' + count + ')</a>';
+        } else if (isUpcoming) {
+            cta = '<a href="/#get-involved" class="btn-primary event-card-cta">Bring your car</a>';
+        }
         return [
             '<article class="event-card">',
             '<div class="event-card-copy">',
@@ -138,7 +188,9 @@
     }
 
     function renderEvents(page) {
-        const { upcoming, past } = splitEvents(loadEvents());
+        const events = loadEvents();
+        const media = page === 'events' ? loadMedia(events) : null;
+        const { upcoming, past } = splitEvents(events);
         if (page === 'home') {
             const section = document.getElementById('next-event');
             const label = document.getElementById('next-event-label');
@@ -171,16 +223,69 @@
             if (upcoming.length === 0) {
                 upcomingCards.innerHTML = '<p class="event-empty">Nothing scheduled right now.</p>';
             } else {
-                upcomingCards.innerHTML = upcoming.map((event) => renderEventCard(event, true)).join('');
+                upcomingCards.innerHTML = upcoming.map((event) => renderEventCard(event, true, media)).join('');
             }
             upcomingSection.hidden = false;
             if (past.length === 0) {
                 pastSection.hidden = true;
                 pastCards.innerHTML = '';
             } else {
-                pastCards.innerHTML = past.map((event) => renderEventCard(event, false)).join('');
+                pastCards.innerHTML = past.map((event) => renderEventCard(event, false, media)).join('');
                 pastSection.hidden = false;
             }
+        }
+    }
+
+    function renderMediaPage() {
+        const events = loadEvents();
+        const media = loadMedia(events);
+        const container = document.getElementById('media-events');
+        if (!container) {
+            failLoud('Media page is missing its event galleries block.');
+        }
+        const withMedia = events
+            .filter((event) => media[event.id] && (media[event.id].photos.length > 0 || shownVideos(media[event.id]).length > 0))
+            .sort((a, b) => parseInstant(b.start, b.id) - parseInstant(a.start, a.id));
+        if (withMedia.length === 0) {
+            failLoud('Media page has no event galleries to show.');
+        }
+        container.innerHTML = withMedia.map((event) => {
+            const entry = media[event.id];
+            const videos = shownVideos(entry);
+            const headingId = event.id + '-heading';
+            const photos = entry.photos.map((photo) => [
+                '<figure class="media-card">',
+                '<button type="button" class="lightbox-trigger">',
+                '<img src="' + escapeHtml(assetUrl(photo.src)) + '" width="' + photo.width + '" height="' + photo.height + '" alt="' + escapeHtml(photo.alt) + '" loading="lazy">',
+                '</button>',
+                '</figure>',
+            ].join('')).join('');
+            const videoBlock = videos.length === 0 ? '' : [
+                '<h3>Videos</h3>',
+                '<div class="media-videos">',
+                videos.map((video) => [
+                    '<video class="media-video" controls playsinline preload="none" poster="' + escapeHtml(assetUrl(video.poster)) + '" aria-label="' + escapeHtml(video.alt) + '">',
+                    '<source src="' + escapeHtml(assetUrl(video.src)) + '" type="video/mp4">',
+                    '</video>',
+                ].join('')).join(''),
+                '</div>',
+            ].join('');
+            return [
+                '<section class="media-event" id="' + escapeHtml(event.id) + '" aria-labelledby="' + escapeHtml(headingId) + '">',
+                '<h2 id="' + escapeHtml(headingId) + '">' + escapeHtml(event.title) + '</h2>',
+                '<p class="media-event-meta">' + escapeHtml(formatLongDate(event.start)) + ' · Benefiting ' + escapeHtml(event.location) + '</p>',
+                entry.photos.length === 0 ? '' : '<div class="media-gallery">' + photos + '</div>',
+                videoBlock,
+                '</section>',
+            ].join('');
+        }).join('');
+
+        if (window.location.hash) {
+            const target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+            if (!target) {
+                failLoud('No media gallery for ' + window.location.hash + '.');
+            }
+            target.scrollIntoView();
         }
     }
 
@@ -190,6 +295,9 @@
     }
     if (page === 'home' || page === 'events') {
         renderEvents(page);
+    }
+    if (page === 'media') {
+        renderMediaPage();
     }
 
     const navToggle = document.querySelector('.nav-toggle');
@@ -228,12 +336,8 @@
 
     if (page === 'media') {
         const videos = document.querySelectorAll('video.media-video');
-        const photos = document.querySelectorAll('.media-gallery img');
-        if (videos.length !== 19) {
-            failLoud('Media page expected 19 videos, found ' + videos.length + '.');
-        }
-        if (photos.length !== 11) {
-            failLoud('Media page expected 11 photos, found ' + photos.length + '.');
+        if (document.querySelectorAll('.media-gallery img').length === 0) {
+            failLoud('Media page rendered no photos.');
         }
         videos.forEach((video) => {
             const source = video.querySelector('source');

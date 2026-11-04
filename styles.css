@@ -962,7 +962,33 @@ main {
 .media-gallery {
     column-count: 3;
     column-gap: 16px;
-    padding: 8px 48px 80px;
+}
+
+.media-event {
+    padding: 40px 48px 24px;
+    scroll-margin-top: 80px;
+}
+
+.media-event:last-child {
+    padding-bottom: 80px;
+}
+
+.media-event h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.media-event-meta {
+    font-size: 16px;
+    color: var(--gray);
+    margin-bottom: 20px;
+}
+
+.media-event h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 16px 0 12px;
 }
 
 .media-card {
@@ -1050,13 +1076,17 @@ main {
         padding: 20px;
     }
 
-    .car-gallery,
-    .media-gallery {
+    .car-gallery {
         column-count: 1;
         padding: 8px 20px 60px;
     }
 
+    .media-gallery {
+        column-count: 1;
+    }
+
     .media-feature,
+    .media-event,
     .media-block {
         padding-left: 20px;
         padding-right: 20px;
